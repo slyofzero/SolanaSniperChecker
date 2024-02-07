@@ -1,3 +1,3 @@
-export interface HardSnipedTokens {
+export interface HypeNewPairs {
   [key: string]: number;
 }

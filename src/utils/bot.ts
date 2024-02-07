@@ -1,10 +1,18 @@
-export function cleanUpBotMessage(text: string) {
-  text = text.replace(/\./g, "\\.").replace(/-/g, "\\-").replace(/!/g, "\\!").replace(/#/g, "\\#");
+// eslint-disable-next-line
+export function cleanUpBotMessage(text: any) {
+  text = String(text);
+  text = text
+    .replace(/\./g, "\\.")
+    .replace(/-/g, "\\-")
+    .replace(/!/g, "\\!")
+    .replace(/#/g, "\\#");
 
   return text;
 }
 
-export function hardCleanUpBotMessage(text: string) {
+// eslint-disable-next-line
+export function hardCleanUpBotMessage(text: any) {
+  text = String(text);
   text = text
     .replace(/\./g, "\\.")
     .replace(/-/g, "\\-")

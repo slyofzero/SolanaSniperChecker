@@ -1,7 +1,7 @@
-import { HardSnipedTokens } from "@/types";
+import { HypeNewPairs } from "@/types";
 
-export let hardSnipedTokens: HardSnipedTokens = {};
+export let hypeNewPairs: HypeNewPairs = {};
 
-export function setHardSnipedTokens(newHardSnipedTokens: HardSnipedTokens) {
-  hardSnipedTokens = newHardSnipedTokens;
+export function setHypeNewPairs(newHardSnipedTokens: HypeNewPairs) {
+  hypeNewPairs = newHardSnipedTokens;
 }

@@ -1,12 +1,13 @@
 import { Bot } from "grammy";
 import { initiateBotCommands, initiateCallbackQueries } from "./bot";
-import { log } from "./utils/handlers";
+import { errorHandler, log } from "./utils/handlers";
 import { BOT_TOKEN, WSS_URL } from "./utils/env";
 import WebSocket from "ws";
 import { PairData } from "./types";
 import { sendAlert } from "./bot/sendAlert";
 import { cleanUpSnipeTokens } from "./bot/cleanUpSnipeTokens";
 import { CLEANUP_INTERVAL } from "./utils/constants";
+import { cleanUpTokenTracking } from "./bot/cleanUpTokenTracking";
 
 if (!BOT_TOKEN || !WSS_URL) {
   log("BOT_TOKEN or WSS_URL is missing");
@@ -37,6 +38,7 @@ const headers = {
   initiateCallbackQueries();
 
   const ws = new WebSocket(WSS_URL, { headers });
+  let isSendingAlert = false;
 
   function connectWebSocket() {
     ws.on("open", function open() {
@@ -48,16 +50,27 @@ const headers = {
       process.exit(1);
     });
 
-    ws.on("message", function incoming(event: Buffer) {
+    ws.on("message", async function incoming(event: Buffer) {
       const str = event.toString();
       const data = JSON.parse(str) as { pairs: PairData[] };
 
       const { pairs } = data;
 
-      if (pairs) sendAlert(pairs);
+      if (pairs && !isSendingAlert) {
+        isSendingAlert = true;
+        try {
+          log("Parsing new data");
+          await sendAlert(pairs);
+        } catch (error) {
+          errorHandler(error);
+        } finally {
+          isSendingAlert = false;
+        }
+      }
     });
 
     setInterval(cleanUpSnipeTokens, CLEANUP_INTERVAL * 1e3);
+    setInterval(cleanUpTokenTracking, 10 * 1e3);
   }
 
   connectWebSocket();
