@@ -1,3 +1,7 @@
 export interface HypeNewPairs {
-  [key: string]: number;
+  [key: string]: {
+    startTime: number;
+    initialMC: number;
+    pastBenchmark: number;
+  };
 }

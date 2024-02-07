@@ -8,7 +8,7 @@ export function cleanUpSnipeTokens() {
   log("Cleanup initiated");
 
   for (const token in hypeNewPairs) {
-    const startTime = hypeNewPairs[token];
+    const { startTime } = hypeNewPairs[token];
     const timeDiff = now - startTime;
 
     if (timeDiff > MAX_START_TIME) {

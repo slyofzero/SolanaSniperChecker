@@ -9,6 +9,7 @@ import { errorHandler, log } from "@/utils/handlers";
 import moment from "moment";
 import { getTokenMetaData } from "@/utils/api";
 import { pairsToTrack } from "@/vars/pairs";
+import { trackMC } from "./trackMC";
 
 export async function sendAlert(pairs: PairData[]) {
   if (!CHANNEL_ID) {
@@ -22,16 +23,18 @@ export async function sendAlert(pairs: PairData[]) {
     const age = moment(pairCreatedAt).fromNow();
     const ageMinutes = Number(age.replace("minutes ago", ""));
 
-    if (
+    if (hypeNewPairs[address]) {
+      trackMC(pair);
+    } else if (
       volume.h24 > VOLUME_THRESHOLD &&
       ageMinutes <= 10 &&
-      !hypeNewPairs[address] &&
       ageMinutes <= AGE_THRESHOLD
     ) {
       const { marketCap, volume, liquidity, priceUsd, pairAddress } = pair;
 
       // Links
       const tokenLink = `https://solscan.io/token/${address}`;
+      const pairLink = `https://solscan.io/account/${pairAddress}`;
       const dexScreenerLink = `https://dexscreener.com/solana/${pairAddress}`;
       const dexToolsLink = `https://www.dextools.io/app/en/solana/pair-explorer/${pairAddress}`;
       const rugCheckLink = `https://rugcheck.xyz/tokens/${address}`;
@@ -42,7 +45,11 @@ export async function sendAlert(pairs: PairData[]) {
       if (!metadata) continue;
 
       const now = Math.floor(Date.now() / 1e3);
-      hypeNewPairs[address] = now;
+      hypeNewPairs[address] = {
+        startTime: now,
+        initialMC: marketCap,
+        pastBenchmark: 1,
+      };
       pairsToTrack[pairAddress] = {
         startTime: now,
         initialPrice: Number(priceUsd),
@@ -77,7 +84,7 @@ Security: [RugCheck](${rugCheckLink})
 🫧 Socials: ${socialsText}
 
 📊 [DexTools](${dexToolsLink}) 📊 [BirdEye](${birdEyeLink})
-📊 [DexScreener](${dexScreenerLink}) 📊 [SolScan](${tokenLink})`;
+📊 [DexScreener](${dexScreenerLink}) 📊 [SolScan](${pairLink})`;
 
       try {
         await teleBot.api.sendMessage(CHANNEL_ID, text, {

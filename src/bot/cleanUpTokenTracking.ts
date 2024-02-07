@@ -1,7 +1,6 @@
 import { PairData } from "@/types";
 import { cleanUpBotMessage, hardCleanUpBotMessage } from "@/utils/bot";
 import { CHANNEL_ID, TOKEN_DATA_URL } from "@/utils/env";
-import { formatToInternational } from "@/utils/general";
 import { errorHandler, log } from "@/utils/handlers";
 import { pairsToTrack } from "@/vars/pairs";
 import { teleBot } from "..";
@@ -32,49 +31,60 @@ export async function cleanUpTokenTracking() {
       const { symbol, address } = baseToken;
 
       const currentPrice = Number(priceUsd);
-      const exactIncrease = Number((currentPrice / initialPrice).toFixed(2));
-      const increase = Math.floor(exactIncrease);
 
-      if (increase > 1 && increase > pastBenchmark) {
-        log(`Token increased by ${increase}x`);
+      if (initialPrice === 0 && currentPrice > 0) {
+        log(`Token ${address} got a non-zero price`);
         pairsToTrack[token] = {
-          initialPrice,
+          initialPrice: currentPrice,
           startTime,
-          pastBenchmark: increase,
+          pastBenchmark: 1,
         };
+      } else {
+        const exactIncrease = Number((currentPrice / initialPrice).toFixed(2));
+        const increase = Math.floor(exactIncrease);
 
-        // Links
-        const tokenLink = `https://solscan.io/token/${address}`;
-        const dexScreenerLink = `https://dexscreener.com/solana/${pairAddress}`;
-        const dexToolsLink = `https://www.dextools.io/app/en/solana/pair-explorer/${pairAddress}`;
-        const birdEyeLink = `https://birdeye.so/token/${address}?chain=solana`;
+        if (increase > 1 && increase > pastBenchmark) {
+          log(`Token ${address} increased by ${increase}x`);
+          pairsToTrack[token] = {
+            initialPrice,
+            startTime,
+            pastBenchmark: increase,
+          };
 
-        const text = `[${hardCleanUpBotMessage(
-          symbol
-        )}](${tokenLink}) jumped by ${cleanUpBotMessage(
-          exactIncrease
-        )}x\\!\\!\\!
+          // Links
+          const tokenLink = `https://solscan.io/token/${address}`;
+          const pairLink = `https://solscan.io/account/${pairAddress}`;
+          const dexScreenerLink = `https://dexscreener.com/solana/${pairAddress}`;
+          const dexToolsLink = `https://www.dextools.io/app/en/solana/pair-explorer/${pairAddress}`;
+          const birdEyeLink = `https://birdeye.so/token/${address}?chain=solana`;
+
+          const text = `[${hardCleanUpBotMessage(
+            symbol
+          )}](${tokenLink}) jumped by ${cleanUpBotMessage(
+            exactIncrease
+          )}x\\!\\!\\!
       
-💲 Price when found: $${cleanUpBotMessage(formatToInternational(initialPrice))}
-💲 Price now: $${cleanUpBotMessage(formatToInternational(currentPrice))}
+💲 Price when found: $${cleanUpBotMessage(initialPrice)}
+💲 Price now: $${cleanUpBotMessage(currentPrice)}
 
 Token Contract:
 \`${address}\`
 
 📊 [DexTools](${dexToolsLink}) 📊 [BirdEye](${birdEyeLink})
-📊 [DexScreener](${dexScreenerLink}) 📊 [SolScan](${tokenLink})`;
+📊 [DexScreener](${dexScreenerLink}) 📊 [SolScan](${pairLink})`;
 
-        teleBot.api
-          .sendMessage(CHANNEL_ID, text, {
-            parse_mode: "MarkdownV2",
-            // @ts-expect-error Param not found
-            disable_web_page_preview: true,
-          })
-          .then(() => log(`Sent message for ${pairAddress}`))
-          .catch((e) => {
-            log(text);
-            errorHandler(e);
-          });
+          teleBot.api
+            .sendMessage(CHANNEL_ID, text, {
+              parse_mode: "MarkdownV2",
+              // @ts-expect-error Param not found
+              disable_web_page_preview: true,
+            })
+            .then(() => log(`Sent message for ${pairAddress}`))
+            .catch((e) => {
+              log(text);
+              errorHandler(e);
+            });
+        }
       }
     }
   }
