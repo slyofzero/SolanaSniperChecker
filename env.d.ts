@@ -7,6 +7,8 @@ declare global {
       CHANNEL_ID: string | undefined;
       HELIUS_API_KEY: string | undefined;
       TOKEN_DATA_URL: string | undefined;
+      DATA_URL: string | undefined;
+      PHOTON_COOKIE: string | undefined;
     }
   }
 }

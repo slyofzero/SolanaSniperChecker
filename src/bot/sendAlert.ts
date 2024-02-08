@@ -1,66 +1,69 @@
-import { PairData } from "@/types";
-import { AGE_THRESHOLD, VOLUME_THRESHOLD } from "@/utils/constants";
+import {
+  AGE_THRESHOLD,
+  LIQUIDITY_THRESHOLD,
+  VOLUME_THRESHOLD,
+} from "@/utils/constants";
 import { formatToInternational, toTitleCase } from "@/utils/general";
-import { hypeNewPairs } from "@/vars/tokens";
+import { hypeNewPairs, setIndexedTokens } from "@/vars/tokens";
 import { teleBot } from "..";
 import { cleanUpBotMessage, hardCleanUpBotMessage } from "@/utils/bot";
 import { CHANNEL_ID } from "@/utils/env";
 import { errorHandler, log } from "@/utils/handlers";
 import moment from "moment";
-import { getTokenMetaData } from "@/utils/api";
-import { pairsToTrack } from "@/vars/pairs";
-import { trackMC } from "./trackMC";
+// import { trackMC } from "./trackMC";
+import { PhotonPairData } from "@/types/livePairs";
 
-export async function sendAlert(pairs: PairData[]) {
+export async function sendAlert(pairs: PhotonPairData[]) {
   if (!CHANNEL_ID) {
     log("CHANNEL_ID is undefined");
     process.exit(1);
   }
 
+  const newIndexedTokens = [];
+
   for (const pair of pairs) {
-    const { baseToken, volume, pairCreatedAt } = pair;
-    const { address, name, symbol } = baseToken;
-    const age = moment(pairCreatedAt).fromNow();
+    const { volume, created_timestamp, tokenAddress, cur_liq } =
+      pair.attributes;
+
+    newIndexedTokens.push(tokenAddress);
+    const age = moment(created_timestamp * 1e3).fromNow();
     const ageMinutes = Number(age.replace("minutes ago", ""));
 
-    if (hypeNewPairs[address]) {
-      trackMC(pair);
+    if (hypeNewPairs[tokenAddress]) {
+      // trackMC(pair);
     } else if (
-      volume.h24 > VOLUME_THRESHOLD &&
-      ageMinutes <= 10 &&
-      ageMinutes <= AGE_THRESHOLD
+      volume >= VOLUME_THRESHOLD &&
+      ageMinutes <= AGE_THRESHOLD &&
+      parseFloat(cur_liq.usd) >= LIQUIDITY_THRESHOLD
     ) {
-      const { marketCap, volume, liquidity, priceUsd, pairAddress } = pair;
+      const {
+        fdv: marketCap,
+        address,
+        socials: storedSocials,
+        symbol,
+        name,
+      } = pair.attributes;
 
       // Links
-      const tokenLink = `https://solscan.io/token/${address}`;
-      const pairLink = `https://solscan.io/account/${pairAddress}`;
-      const dexScreenerLink = `https://dexscreener.com/solana/${pairAddress}`;
-      const dexToolsLink = `https://www.dextools.io/app/en/solana/pair-explorer/${pairAddress}`;
-      const rugCheckLink = `https://rugcheck.xyz/tokens/${address}`;
-      const birdEyeLink = `https://birdeye.so/token/${address}?chain=solana`;
-
-      // Metadata
-      const metadata = await getTokenMetaData(address);
-      if (!metadata) continue;
+      const tokenLink = `https://solscan.io/token/${tokenAddress}`;
+      const pairLink = `https://solscan.io/account/${address}`;
+      const dexScreenerLink = `https://dexscreener.com/solana/${address}`;
+      const dexToolsLink = `https://www.dextools.io/app/en/solana/pair-explorer/${address}`;
+      const rugCheckLink = `https://rugcheck.xyz/tokens/${tokenAddress}`;
+      const birdEyeLink = `https://birdeye.so/token/${tokenAddress}?chain=solana`;
 
       const now = Math.floor(Date.now() / 1e3);
-      hypeNewPairs[address] = {
+      hypeNewPairs[tokenAddress] = {
         startTime: now,
         initialMC: marketCap,
         pastBenchmark: 1,
       };
-      pairsToTrack[pairAddress] = {
-        startTime: now,
-        initialPrice: Number(priceUsd),
-        pastBenchmark: 1,
-      };
 
       const socials = [];
-      for (const [social, socialLink] of Object.entries(
-        metadata.offChainMetadata?.metadata?.extensions || {}
-      )) {
-        socials.push(`[${toTitleCase(social)}](${socialLink})`);
+      for (const [social, socialLink] of Object.entries(storedSocials || {})) {
+        if (socialLink) {
+          socials.push(`[${toTitleCase(social)}](${socialLink})`);
+        }
       }
       const socialsText = socials.join(" \\| ") || "No links available";
 
@@ -70,15 +73,13 @@ export async function sendAlert(pairs: PairData[]) {
       )}](${tokenLink})
       
 💰Market Cap $${cleanUpBotMessage(formatToInternational(marketCap))}
-💲 Price: $${cleanUpBotMessage(formatToInternational(parseFloat(priceUsd)))}
-
-📈 Volume: $${cleanUpBotMessage(formatToInternational(volume.h24))}
+📈 Volume: $${cleanUpBotMessage(formatToInternational(volume))}
 💰 Mcap: $${cleanUpBotMessage(formatToInternational(marketCap))}
-💧 Liquidity: $${cleanUpBotMessage(formatToInternational(liquidity.usd))}
+💧 Liquidity: $${cleanUpBotMessage(cur_liq.usd)}
 ⌛ Token Created: ${age}
 
 Token Contract: 
-\`${address}\`
+\`${tokenAddress}\`
 
 Security: [RugCheck](${rugCheckLink})
 🫧 Socials: ${socialsText}
@@ -93,10 +94,12 @@ Security: [RugCheck](${rugCheckLink})
           disable_web_page_preview: true,
         });
 
-        log(`Sent message for ${pairAddress} ${name}`);
+        log(`Sent message for ${address} ${name}`);
       } catch (error) {
         errorHandler(error);
       }
     }
   }
+
+  setIndexedTokens(newIndexedTokens);
 }

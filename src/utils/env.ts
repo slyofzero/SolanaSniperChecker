@@ -8,4 +8,6 @@ export const {
   CHANNEL_ID,
   HELIUS_API_KEY,
   TOKEN_DATA_URL,
+  DATA_URL,
+  PHOTON_COOKIE,
 } = process.env;
