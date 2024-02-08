@@ -2,27 +2,26 @@ import { cleanUpBotMessage, hardCleanUpBotMessage } from "@/utils/bot";
 import { CHANNEL_ID } from "@/utils/env";
 import { teleBot } from "..";
 import { log } from "console";
-import { PairData } from "@/types";
 import { hypeNewPairs } from "@/vars/tokens";
 import { errorHandler } from "@/utils/handlers";
 import { formatToInternational } from "@/utils/general";
+import { PhotonPairData } from "@/types/livePairs";
 
-export async function trackMC(pair: PairData) {
+export async function trackMC(pair: PhotonPairData) {
   if (!CHANNEL_ID) {
     log("CHANNEL_ID is undefined");
     process.exit(1);
   }
 
-  const { baseToken, marketCap, pairAddress } = pair;
-  const { address, symbol } = baseToken;
+  const { fdv: marketCap, address, tokenAddress, symbol } = pair.attributes;
 
-  const { initialMC, pastBenchmark, startTime } = hypeNewPairs[address];
+  const { initialMC, pastBenchmark, startTime } = hypeNewPairs[tokenAddress];
 
   const currentMC = Number(marketCap);
 
   if (initialMC === 0 && currentMC > 0) {
-    log(`Token ${address} got a non-zero price`);
-    hypeNewPairs[address] = {
+    log(`Token ${tokenAddress} got a non-zero price`);
+    hypeNewPairs[tokenAddress] = {
       initialMC: currentMC,
       startTime,
       pastBenchmark: 1,
@@ -32,19 +31,19 @@ export async function trackMC(pair: PairData) {
     const increase = Math.floor(exactIncrease);
 
     if (increase > 1 && increase > pastBenchmark) {
-      log(`Token ${address} increased by ${increase}x`);
-      hypeNewPairs[address] = {
+      log(`Token ${tokenAddress} increased by ${increase}x`);
+      hypeNewPairs[tokenAddress] = {
         initialMC,
         startTime,
         pastBenchmark: increase,
       };
 
       // Links
-      const tokenLink = `https://solscan.io/token/${address}`;
-      const pairLink = `https://solscan.io/account/${pairAddress}`;
-      const dexScreenerLink = `https://dexscreener.com/solana/${pairAddress}`;
-      const dexToolsLink = `https://www.dextools.io/app/en/solana/pair-explorer/${pairAddress}`;
-      const birdEyeLink = `https://birdeye.so/token/${address}?chain=solana`;
+      const tokenLink = `https://solscan.io/token/${tokenAddress}`;
+      const pairLink = `https://solscan.io/account/${address}`;
+      const dexScreenerLink = `https://dexscreener.com/solana/${address}`;
+      const dexToolsLink = `https://www.dextools.io/app/en/solana/pair-explorer/${address}`;
+      const birdEyeLink = `https://birdeye.so/token/${tokenAddress}?chain=solana`;
 
       const text = `[${hardCleanUpBotMessage(
         symbol
@@ -54,7 +53,7 @@ export async function trackMC(pair: PairData) {
 💲 MC now: $${cleanUpBotMessage(formatToInternational(currentMC))}
 
 Token Contract:
-\`${address}\`
+\`${tokenAddress}\`
 
 📊 [DexTools](${dexToolsLink}) 📊 [BirdEye](${birdEyeLink})
 📊 [DexScreener](${dexScreenerLink}) 📊 [SolScan](${pairLink})`;
@@ -65,7 +64,7 @@ Token Contract:
           // @ts-expect-error Param not found
           disable_web_page_preview: true,
         })
-        .then(() => log(`Sent message for ${pairAddress}`))
+        .then(() => log(`Sent message for ${address}`))
         .catch((e) => {
           log(text);
           errorHandler(e);

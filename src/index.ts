@@ -30,9 +30,9 @@ log("Bot instance ready");
     });
 
     const pairs = (await response.json()) as PhotonPairs;
-    sendAlert(pairs.data);
+    await sendAlert(pairs.data);
 
-    setTimeout(toRepeat, 10 * 1e3);
+    setTimeout(toRepeat, 30 * 1e3);
   }
 
   toRepeat();

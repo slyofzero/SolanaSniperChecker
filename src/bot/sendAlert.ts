@@ -12,6 +12,7 @@ import { errorHandler, log } from "@/utils/handlers";
 import moment from "moment";
 // import { trackMC } from "./trackMC";
 import { PhotonPairData } from "@/types/livePairs";
+import { trackMC } from "./trackMC";
 
 export async function sendAlert(pairs: PhotonPairData[]) {
   if (!CHANNEL_ID) {
@@ -30,7 +31,7 @@ export async function sendAlert(pairs: PhotonPairData[]) {
     const ageMinutes = Number(age.replace("minutes ago", ""));
 
     if (hypeNewPairs[tokenAddress]) {
-      // trackMC(pair);
+      trackMC(pair);
     } else if (
       volume >= VOLUME_THRESHOLD &&
       ageMinutes <= AGE_THRESHOLD &&
@@ -42,6 +43,8 @@ export async function sendAlert(pairs: PhotonPairData[]) {
         socials: storedSocials,
         symbol,
         name,
+        init_liq,
+        audit,
       } = pair.attributes;
 
       // Links
@@ -67,16 +70,44 @@ export async function sendAlert(pairs: PhotonPairData[]) {
       }
       const socialsText = socials.join(" \\| ") || "No links available";
 
+      // Token Info
+      const initliquidity = cleanUpBotMessage(
+        formatToInternational(Number(init_liq.quote).toFixed(2))
+      );
+      const initliquidityUsd = cleanUpBotMessage(
+        formatToInternational(Number(init_liq.usd).toFixed(2))
+      );
+
+      const liquidity = cleanUpBotMessage(
+        formatToInternational(cur_liq.quote.toFixed(2))
+      );
+      const liquidityUsd = cleanUpBotMessage(
+        formatToInternational(cur_liq.usd)
+      );
+
+      // Audit
+      const { lp_burned_perc, mint_authority, top_holders_perc } = audit;
+      const mintStatus = mint_authority ? "✅" : "❌";
+      const mintText = mint_authority ? "Enabled" : "Disabled";
+      const lpStatus = lp_burned_perc === 100 ? "✅" : "❌";
+      const lpText =
+        lp_burned_perc === 100
+          ? "All LP Tokens burnt"
+          : `Deployer owns ${(100 - lp_burned_perc).toFixed(0)}% of LP`;
+
       // Text
       const text = `${hardCleanUpBotMessage(name)} \\| [${hardCleanUpBotMessage(
         symbol
       )}](${tokenLink})
       
-💰Market Cap $${cleanUpBotMessage(formatToInternational(marketCap))}
 📈 Volume: $${cleanUpBotMessage(formatToInternational(volume))}
 💰 Mcap: $${cleanUpBotMessage(formatToInternational(marketCap))}
-💧 Liquidity: $${cleanUpBotMessage(cur_liq.usd)}
-⌛ Token Created: ${age}
+💵 Intial Lp: ${initliquidity} SOL \\($${initliquidityUsd}\\)
+🏦 Lp SOL: ${liquidity} SOL \\($${liquidityUsd}\\)
+👥 Top 10 Holders: Owns ${cleanUpBotMessage(top_holders_perc.toFixed(2))}%
+
+${mintStatus} Mint: ${mintText}
+${lpStatus} LP status: ${lpText}
 
 Token Contract: 
 \`${tokenAddress}\`
@@ -96,6 +127,7 @@ Security: [RugCheck](${rugCheckLink})
 
         log(`Sent message for ${address} ${name}`);
       } catch (error) {
+        log(text);
         errorHandler(error);
       }
     }
