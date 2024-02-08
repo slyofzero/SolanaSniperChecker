@@ -4,10 +4,8 @@ dotenv.config();
 export const {
   BOT_TOKEN,
   BOT_USERNAME,
-  WSS_URL,
   CHANNEL_ID,
-  HELIUS_API_KEY,
-  TOKEN_DATA_URL,
   DATA_URL,
   PHOTON_COOKIE,
+  RPC_ENDPOINT,
 } = process.env;

@@ -3,12 +3,10 @@ declare global {
     interface ProcessEnv {
       BOT_TOKEN: string | undefined;
       BOT_USERNAME: string | undefined;
-      WSS_URL: string | undefined;
       CHANNEL_ID: string | undefined;
-      HELIUS_API_KEY: string | undefined;
-      TOKEN_DATA_URL: string | undefined;
       DATA_URL: string | undefined;
       PHOTON_COOKIE: string | undefined;
+      RPC_ENDPOINT: string | undefined;
     }
   }
 }

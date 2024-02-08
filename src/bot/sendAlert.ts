@@ -10,9 +10,10 @@ import { cleanUpBotMessage, hardCleanUpBotMessage } from "@/utils/bot";
 import { CHANNEL_ID } from "@/utils/env";
 import { errorHandler, log } from "@/utils/handlers";
 import moment from "moment";
-// import { trackMC } from "./trackMC";
 import { PhotonPairData } from "@/types/livePairs";
 import { trackMC } from "./trackMC";
+import { PublicKey } from "@solana/web3.js";
+import { solanaConnection } from "@/rpc";
 
 export async function sendAlert(pairs: PhotonPairData[]) {
   if (!CHANNEL_ID) {
@@ -28,7 +29,10 @@ export async function sendAlert(pairs: PhotonPairData[]) {
 
     newIndexedTokens.push(tokenAddress);
     const age = moment(created_timestamp * 1e3).fromNow();
-    const ageMinutes = Number(age.replace("minutes ago", ""));
+    const ageMinutes =
+      Number(age.replace("minutes ago", "")) ||
+      Number(age.replace("a minutes ago", "1")) ||
+      Number(age.replace("a few seconds ago", "1"));
 
     if (hypeNewPairs[tokenAddress]) {
       trackMC(pair);
@@ -85,6 +89,10 @@ export async function sendAlert(pairs: PhotonPairData[]) {
         formatToInternational(cur_liq.usd)
       );
 
+      const totalSupply = (
+        await solanaConnection.getTokenSupply(new PublicKey(tokenAddress))
+      ).value.uiAmount;
+
       // Audit
       const { lp_burned_perc, mint_authority, top_holders_perc } = audit;
       const mintStatus = mint_authority ? "✅" : "❌";
@@ -100,10 +108,11 @@ export async function sendAlert(pairs: PhotonPairData[]) {
         symbol
       )}](${tokenLink})
       
+Supply: ${cleanUpBotMessage(formatToInternational(totalSupply || 0))}
 📈 Volume: $${cleanUpBotMessage(formatToInternational(volume))}
-💰 Mcap: $${cleanUpBotMessage(formatToInternational(marketCap))}
-💵 Intial Lp: ${initliquidity} SOL \\($${initliquidityUsd}\\)
-🏦 Lp SOL: ${liquidity} SOL \\($${liquidityUsd}\\)
+💰 MCap: $${cleanUpBotMessage(formatToInternational(marketCap))}
+💵 Intial Lp: ${initliquidity} SOL *\\($${initliquidityUsd}\\)*
+🏦 Lp SOL: ${liquidity} SOL *\\($${liquidityUsd}\\)*
 👥 Top 10 Holders: Owns ${cleanUpBotMessage(top_holders_perc.toFixed(2))}%
 
 ${mintStatus} Mint: ${mintText}
