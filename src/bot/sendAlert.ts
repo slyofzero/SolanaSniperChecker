@@ -93,8 +93,29 @@ export async function sendAlert(pairs: PhotonPairData[]) {
         await solanaConnection.getTokenSupply(new PublicKey(tokenAddress))
       ).value.uiAmount;
 
+      const token = new PublicKey(
+        "HYCXejtWUGVLkUs36kTGVtnDXyboXKBVCs5bbNjqUGGT"
+      );
+      const addresses = await solanaConnection.getTokenLargestAccounts(token);
+      const balances = addresses.value.slice(0, 10);
+      let top10Hold = 0;
+      const balancesText = balances
+        .map((balance) => {
+          const address = balance?.address.toString();
+
+          if (balance.uiAmount && totalSupply) {
+            top10Hold += parseFloat(balance.uiAmount.toFixed(2));
+            const percHeld = cleanUpBotMessage(
+              ((balance.uiAmount / totalSupply) * 100).toFixed(2)
+            );
+            return `[${percHeld}%](https://solscan.io/account/${address})`;
+          }
+        })
+        .slice(0, 5)
+        .join(" \\| ");
+
       // Audit
-      const { lp_burned_perc, mint_authority, top_holders_perc } = audit;
+      const { lp_burned_perc, mint_authority } = audit;
       const mintStatus = mint_authority ? "✅" : "❌";
       const mintText = mint_authority ? "Enabled" : "Disabled";
       const lpStatus = lp_burned_perc === 100 ? "✅" : "❌";
@@ -113,7 +134,11 @@ Supply: ${cleanUpBotMessage(formatToInternational(totalSupply || 0))}
 💰 MCap: $${cleanUpBotMessage(formatToInternational(marketCap))}
 💵 Intial Lp: ${initliquidity} SOL *\\($${initliquidityUsd}\\)*
 🏦 Lp SOL: ${liquidity} SOL *\\($${liquidityUsd}\\)*
-👥 Top 10 Holders: Owns ${cleanUpBotMessage(top_holders_perc.toFixed(2))}%
+👥 Top 10 Holders: Owns ${cleanUpBotMessage(
+        (top10Hold / (totalSupply || 1)).toFixed(2)
+      )}%
+👥 Top Holders:
+${balancesText}
 
 ${mintStatus} Mint: ${mintText}
 ${lpStatus} LP status: ${lpText}
