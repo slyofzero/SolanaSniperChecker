@@ -14,9 +14,7 @@ export async function trackMC(pair: PhotonPairData) {
   }
 
   const { fdv: marketCap, address, tokenAddress, symbol } = pair.attributes;
-
   const { initialMC, pastBenchmark, startTime } = hypeNewPairs[tokenAddress];
-
   const currentMC = Number(marketCap);
 
   if (initialMC === 0 && currentMC > 0) {
@@ -40,14 +38,17 @@ export async function trackMC(pair: PhotonPairData) {
 
       // Links
       const tokenLink = `https://solscan.io/token/${tokenAddress}`;
-      const pairLink = `https://solscan.io/account/${address}`;
-      const dexScreenerLink = `https://dexscreener.com/solana/${address}`;
-      const dexToolsLink = `https://www.dextools.io/app/en/solana/pair-explorer/${address}`;
-      const birdEyeLink = `https://birdeye.so/token/${tokenAddress}?chain=solana`;
+      const solanaTradingBotLink = `https://t.me/SolanaTradingBot?start=${tokenAddress}`;
+      const bonkBotLink = `https://t.me/bonkbot_bot?start=${tokenAddress}`;
+      const magnumLink = `https://t.me/magnum_trade_bot?start=${tokenAddress}`;
+      const bananaLink = `https://t.me/BananaGunSolana_bot?start=${tokenAddress}`;
+      const unibot = `https://t.me/solana_unibot?start=${tokenAddress}`;
 
-      const text = `[${hardCleanUpBotMessage(
-        symbol
-      )}](${tokenLink}) jumped by ${cleanUpBotMessage(exactIncrease)}x\\!\\!\\!
+      const text = `Powered By [Solana Hype Alerts](https://t.me/SolanaHypeTokenAlerts)
+
+[${hardCleanUpBotMessage(symbol)}](${tokenLink}) jumped by ${cleanUpBotMessage(
+        exactIncrease
+      )}x\\!\\!\\!
       
 💲 MC when found: $${cleanUpBotMessage(formatToInternational(initialMC))}
 💲 MC now: $${cleanUpBotMessage(formatToInternational(currentMC))}
@@ -55,8 +56,9 @@ export async function trackMC(pair: PhotonPairData) {
 Token Contract:
 \`${tokenAddress}\`
 
-📊 [DexTools](${dexToolsLink}) 📊 [BirdEye](${birdEyeLink})
-📊 [DexScreener](${dexScreenerLink}) 📊 [SolScan](${pairLink})`;
+Buy:
+[SolTradeBot](${solanaTradingBotLink}) \\| [BonkBot](${bonkBotLink}) \\| [Magnum](${magnumLink})
+[BananaGun](${bananaLink}) \\| [Unibot](${unibot})`;
 
       teleBot.api
         .sendMessage(CHANNEL_ID, text, {

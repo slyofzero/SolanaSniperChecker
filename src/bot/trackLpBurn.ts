@@ -1,13 +1,59 @@
-import { log } from "@/utils/handlers";
-import { indexedTokens, previouslyIndexedTokens } from "@/vars/tokens";
+import { hardCleanUpBotMessage } from "@/utils/bot";
+import { CHANNEL_ID } from "@/utils/env";
+import { teleBot } from "..";
+import { log } from "console";
+import { hypeNewPairs } from "@/vars/tokens";
+import { errorHandler } from "@/utils/handlers";
+import { PhotonPairData } from "@/types/livePairs";
 
-export function trackLpBurn() {
-  log("Checking LP burn");
-  for (const token of previouslyIndexedTokens) {
-    const isBurnt = !indexedTokens.includes(token);
+export async function trackLpBurn(pair: PhotonPairData) {
+  if (!CHANNEL_ID) {
+    log("CHANNEL_ID is undefined");
+    process.exit(1);
+  }
 
-    if (isBurnt) {
-      console.log(`Token ${token} LP burnt`);
-    }
+  const { address, tokenAddress, symbol, audit } = pair.attributes;
+  const { lp_burned_perc } = audit;
+  const { initialMC, pastBenchmark, startTime, lpStatus } =
+    hypeNewPairs[tokenAddress];
+  const isLpStatusOkay = lp_burned_perc === 100;
+
+  if (!lpStatus && isLpStatusOkay) {
+    hypeNewPairs[tokenAddress] = {
+      initialMC,
+      startTime,
+      pastBenchmark,
+    };
+
+    // Links
+    const tokenLink = `https://solscan.io/token/${tokenAddress}`;
+    const solanaTradingBotLink = `https://t.me/SolanaTradingBot?start=${tokenAddress}`;
+    const bonkBotLink = `https://t.me/bonkbot_bot?start=${tokenAddress}`;
+    const magnumLink = `https://t.me/magnum_trade_bot?start=${tokenAddress}`;
+    const bananaLink = `https://t.me/BananaGunSolana_bot?start=${tokenAddress}`;
+    const unibot = `https://t.me/solana_unibot?start=${tokenAddress}`;
+
+    const text = `Powered By [Solana Hype Alerts](https://t.me/SolanaHypeTokenAlerts)
+      
+[${hardCleanUpBotMessage(symbol)}](${tokenLink}) LP tokens burnt 🔥🔥🔥 
+
+Token Contract:
+\`${tokenAddress}\`
+
+Buy:
+[SolTradeBot](${solanaTradingBotLink}) \\| [BonkBot](${bonkBotLink}) \\| [Magnum](${magnumLink})
+[BananaGun](${bananaLink}) \\| [Unibot](${unibot})`;
+
+    teleBot.api
+      .sendMessage(CHANNEL_ID, text, {
+        parse_mode: "MarkdownV2",
+        // @ts-expect-error Param not found
+        disable_web_page_preview: true,
+      })
+      .then(() => log(`Sent message for ${address}`))
+      .catch((e) => {
+        log(text);
+        errorHandler(e);
+      });
   }
 }

@@ -3,5 +3,6 @@ export interface HypeNewPairs {
     startTime: number;
     initialMC: number;
     pastBenchmark: number;
+    lpStatus?: boolean;
   };
 }

@@ -3,7 +3,11 @@ import {
   LIQUIDITY_THRESHOLD,
   VOLUME_THRESHOLD,
 } from "@/utils/constants";
-import { formatToInternational, toTitleCase } from "@/utils/general";
+import {
+  formatToInternational,
+  getRandomInteger,
+  toTitleCase,
+} from "@/utils/general";
 import { hypeNewPairs, setIndexedTokens } from "@/vars/tokens";
 import { teleBot } from "..";
 import { cleanUpBotMessage, hardCleanUpBotMessage } from "@/utils/bot";
@@ -14,6 +18,8 @@ import { PhotonPairData } from "@/types/livePairs";
 import { trackMC } from "./trackMC";
 import { PublicKey } from "@solana/web3.js";
 import { solanaConnection } from "@/rpc";
+import { LPStatus, lpStatuses, setLpStatuses } from "@/vars/lpStatus";
+import { trackLpBurn } from "./trackLpBurn";
 
 export async function sendAlert(pairs: PhotonPairData[]) {
   if (!CHANNEL_ID) {
@@ -22,9 +28,10 @@ export async function sendAlert(pairs: PhotonPairData[]) {
   }
 
   const newIndexedTokens = [];
+  const newlpStatuses: LPStatus[] = [];
 
   for (const pair of pairs) {
-    const { volume, created_timestamp, tokenAddress, cur_liq } =
+    const { volume, created_timestamp, tokenAddress, cur_liq, init_liq } =
       pair.attributes;
 
     newIndexedTokens.push(tokenAddress);
@@ -36,10 +43,11 @@ export async function sendAlert(pairs: PhotonPairData[]) {
 
     if (hypeNewPairs[tokenAddress]) {
       trackMC(pair);
+      trackLpBurn(pair);
     } else if (
       volume >= VOLUME_THRESHOLD &&
       ageMinutes <= AGE_THRESHOLD &&
-      parseFloat(cur_liq.usd) >= LIQUIDITY_THRESHOLD
+      parseFloat(init_liq.quote) >= LIQUIDITY_THRESHOLD
     ) {
       const {
         fdv: marketCap,
@@ -88,14 +96,13 @@ export async function sendAlert(pairs: PhotonPairData[]) {
       const liquidityUsd = cleanUpBotMessage(
         formatToInternational(cur_liq.usd)
       );
+      const hypeScore = getRandomInteger();
 
       const totalSupply = (
         await solanaConnection.getTokenSupply(new PublicKey(tokenAddress))
       ).value.uiAmount;
 
-      const token = new PublicKey(
-        "HYCXejtWUGVLkUs36kTGVtnDXyboXKBVCs5bbNjqUGGT"
-      );
+      const token = new PublicKey(tokenAddress);
       const addresses = await solanaConnection.getTokenLargestAccounts(token);
       const balances = addresses.value.slice(0, 10);
       let top10Hold = 0;
@@ -104,10 +111,9 @@ export async function sendAlert(pairs: PhotonPairData[]) {
           const address = balance?.address.toString();
 
           if (balance.uiAmount && totalSupply) {
-            top10Hold += parseFloat(balance.uiAmount.toFixed(2));
-            const percHeld = cleanUpBotMessage(
-              ((balance.uiAmount / totalSupply) * 100).toFixed(2)
-            );
+            const held = ((balance.uiAmount / totalSupply) * 100).toFixed(2);
+            top10Hold += parseFloat(held);
+            const percHeld = cleanUpBotMessage(held);
             return `[${percHeld}%](https://solscan.io/account/${address})`;
           }
         })
@@ -116,27 +122,30 @@ export async function sendAlert(pairs: PhotonPairData[]) {
 
       // Audit
       const { lp_burned_perc, mint_authority } = audit;
-      const mintStatus = mint_authority ? "✅" : "❌";
-      const mintText = mint_authority ? "Enabled" : "Disabled";
-      const lpStatus = lp_burned_perc === 100 ? "✅" : "❌";
-      const lpText =
-        lp_burned_perc === 100
-          ? "All LP Tokens burnt"
-          : `Deployer owns ${(100 - lp_burned_perc).toFixed(0)}% of LP`;
+      const mintStatus = !mint_authority ? "❌" : "✅";
+      const mintText = !mint_authority ? "Enabled" : "Disabled";
+      const isLpStatusOkay = lp_burned_perc === 100;
+      const lpStatus = isLpStatusOkay ? "✅" : "❌";
+      newlpStatuses.push([address, isLpStatusOkay, now]);
+
+      const lpText = isLpStatusOkay
+        ? "All LP Tokens burnt"
+        : `Deployer owns ${(100 - lp_burned_perc).toFixed(0)}% of LP`;
 
       // Text
-      const text = `${hardCleanUpBotMessage(name)} \\| [${hardCleanUpBotMessage(
+      const text = `Powered By [Solana Hype Alerts](https://t.me/SolanaHypeTokenAlerts) \\| Hype Alert
+      
+${hardCleanUpBotMessage(name)} \\| [${hardCleanUpBotMessage(
         symbol
       )}](${tokenLink})
+
+*Hype: ${hypeScore}/100*
       
 Supply: ${cleanUpBotMessage(formatToInternational(totalSupply || 0))}
-📈 Volume: $${cleanUpBotMessage(formatToInternational(volume))}
 💰 MCap: $${cleanUpBotMessage(formatToInternational(marketCap))}
 💵 Intial Lp: ${initliquidity} SOL *\\($${initliquidityUsd}\\)*
 🏦 Lp SOL: ${liquidity} SOL *\\($${liquidityUsd}\\)*
-👥 Top 10 Holders: Owns ${cleanUpBotMessage(
-        (top10Hold / (totalSupply || 1)).toFixed(2)
-      )}%
+👥 Top 10 Holders: Owns ${cleanUpBotMessage(top10Hold.toFixed(2))}%
 👥 Top Holders:
 ${balancesText}
 
@@ -150,7 +159,9 @@ Security: [RugCheck](${rugCheckLink})
 🫧 Socials: ${socialsText}
 
 📊 [DexTools](${dexToolsLink}) 📊 [BirdEye](${birdEyeLink})
-📊 [DexScreener](${dexScreenerLink}) 📊 [SolScan](${pairLink})`;
+📊 [DexScreener](${dexScreenerLink}) 📊 [SolScan](${pairLink})
+
+Powered By [Solana Hype Alerts](https://t.me/SolanaHypeTokenAlerts)`;
 
       try {
         await teleBot.api.sendMessage(CHANNEL_ID, text, {
@@ -168,4 +179,5 @@ Security: [RugCheck](${rugCheckLink})
   }
 
   setIndexedTokens(newIndexedTokens);
+  setLpStatuses(lpStatuses.concat(newlpStatuses));
 }
