@@ -18,8 +18,8 @@ import { PhotonPairData } from "@/types/livePairs";
 import { trackMC } from "./trackMC";
 import { PublicKey } from "@solana/web3.js";
 import { solanaConnection } from "@/rpc";
-import { LPStatus, lpStatuses, setLpStatuses } from "@/vars/lpStatus";
 import { trackLpBurn } from "./trackLpBurn";
+import { promoText } from "@/vars/promo";
 
 export async function sendAlert(pairs: PhotonPairData[]) {
   if (!CHANNEL_ID) {
@@ -28,7 +28,6 @@ export async function sendAlert(pairs: PhotonPairData[]) {
   }
 
   const newIndexedTokens = [];
-  const newlpStatuses: LPStatus[] = [];
 
   for (const pair of pairs) {
     const { volume, created_timestamp, tokenAddress, cur_liq, init_liq } =
@@ -126,7 +125,6 @@ export async function sendAlert(pairs: PhotonPairData[]) {
       const mintText = !mint_authority ? "Enabled" : "Disabled";
       const isLpStatusOkay = lp_burned_perc === 100;
       const lpStatus = isLpStatusOkay ? "✅" : "❌";
-      newlpStatuses.push([address, isLpStatusOkay, now]);
 
       const lpText = isLpStatusOkay
         ? "All LP Tokens burnt"
@@ -161,7 +159,7 @@ Security: [RugCheck](${rugCheckLink})
 📊 [DexTools](${dexToolsLink}) 📊 [BirdEye](${birdEyeLink})
 📊 [DexScreener](${dexScreenerLink}) 📊 [SolScan](${pairLink})
 
-Powered By [Solana Hype Alerts](https://t.me/SolanaHypeTokenAlerts)`;
+Powered By [Solana Hype Alerts](https://t.me/SolanaHypeTokenAlerts)${promoText}`;
 
       try {
         await teleBot.api.sendMessage(CHANNEL_ID, text, {
@@ -179,5 +177,4 @@ Powered By [Solana Hype Alerts](https://t.me/SolanaHypeTokenAlerts)`;
   }
 
   setIndexedTokens(newIndexedTokens);
-  setLpStatuses(lpStatuses.concat(newlpStatuses));
 }

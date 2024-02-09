@@ -1,10 +1,10 @@
 import { hardCleanUpBotMessage } from "@/utils/bot";
 import { CHANNEL_ID } from "@/utils/env";
 import { teleBot } from "..";
-import { log } from "console";
 import { hypeNewPairs } from "@/vars/tokens";
-import { errorHandler } from "@/utils/handlers";
+import { errorHandler, log } from "@/utils/handlers";
 import { PhotonPairData } from "@/types/livePairs";
+import { promoText } from "@/vars/promo";
 
 export async function trackLpBurn(pair: PhotonPairData) {
   if (!CHANNEL_ID) {
@@ -42,7 +42,7 @@ Token Contract:
 
 Buy:
 [SolTradeBot](${solanaTradingBotLink}) \\| [BonkBot](${bonkBotLink}) \\| [Magnum](${magnumLink})
-[BananaGun](${bananaLink}) \\| [Unibot](${unibot})`;
+[BananaGun](${bananaLink}) \\| [Unibot](${unibot})${promoText}`;
 
     teleBot.api
       .sendMessage(CHANNEL_ID, text, {
