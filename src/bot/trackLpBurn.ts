@@ -23,6 +23,7 @@ export async function trackLpBurn(pair: PhotonPairData) {
       initialMC,
       startTime,
       pastBenchmark,
+      lpStatus: true,
     };
 
     // Links
