@@ -31,8 +31,14 @@ export async function sendAlert(pairs: PhotonPairData[]) {
   log(`Got ${pairs.length} tokens`);
 
   for (const pair of pairs) {
-    const { volume, created_timestamp, tokenAddress, cur_liq, init_liq } =
-      pair.attributes;
+    const {
+      volume,
+      created_timestamp,
+      tokenAddress,
+      cur_liq,
+      init_liq,
+      fdv: marketCap,
+    } = pair.attributes;
 
     newIndexedTokens.push(tokenAddress);
     const age = moment(created_timestamp * 1e3).fromNow();
@@ -48,10 +54,10 @@ export async function sendAlert(pairs: PhotonPairData[]) {
       volume >= VOLUME_THRESHOLD &&
       ageMinutes <= AGE_THRESHOLD &&
       parseFloat(init_liq.quote) >= LIQUIDITY_THRESHOLD &&
-      parseFloat(init_liq.quote) <= 50
+      parseFloat(init_liq.quote) <= 50 &&
+      marketCap > 0
     ) {
       const {
-        fdv: marketCap,
         address,
         socials: storedSocials,
         symbol,
