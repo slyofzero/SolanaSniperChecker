@@ -38,11 +38,6 @@ export async function trackMC(pair: PhotonPairData) {
 
       // Links
       const tokenLink = `https://solscan.io/token/${tokenAddress}`;
-      const solanaTradingBotLink = `https://t.me/SolanaTradingBot?start=${tokenAddress}`;
-      const bonkBotLink = `https://t.me/bonkbot_bot?start=${tokenAddress}`;
-      const magnumLink = `https://t.me/magnum_trade_bot?start=${tokenAddress}`;
-      const bananaLink = `https://t.me/BananaGunSolana_bot?start=${tokenAddress}`;
-      const unibot = `https://t.me/solana_unibot?start=${tokenAddress}`;
       const dexScreenerLink = `https://dexscreener.com/solana/${address}`;
       const birdEyeLink = `https://birdeye.so/token/${tokenAddress}?chain=solana`;
 
@@ -58,9 +53,6 @@ export async function trackMC(pair: PhotonPairData) {
 Token Contract:
 \`${tokenAddress}\`
 
-Buy:
-[SolTradeBot](${solanaTradingBotLink}) \\| [BonkBot](${bonkBotLink}) \\| [Magnum](${magnumLink})
-[BananaGun](${bananaLink}) \\| [Unibot](${unibot})${promoText}
 [DexScreener](${dexScreenerLink}) \\| [BirdEye](${birdEyeLink})${promoText}`;
 
       teleBot.api
