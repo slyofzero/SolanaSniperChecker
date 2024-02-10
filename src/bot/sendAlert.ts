@@ -28,6 +28,7 @@ export async function sendAlert(pairs: PhotonPairData[]) {
   }
 
   const newIndexedTokens = [];
+  log(`Got ${pairs.length} tokens`);
 
   for (const pair of pairs) {
     const { volume, created_timestamp, tokenAddress, cur_liq, init_liq } =
@@ -67,11 +68,6 @@ export async function sendAlert(pairs: PhotonPairData[]) {
       const birdEyeLink = `https://birdeye.so/token/${tokenAddress}?chain=solana`;
 
       const now = Math.floor(Date.now() / 1e3);
-      hypeNewPairs[tokenAddress] = {
-        startTime: now,
-        initialMC: marketCap,
-        pastBenchmark: 1,
-      };
 
       const socials = [];
       for (const [social, socialLink] of Object.entries(storedSocials || {})) {
@@ -162,11 +158,19 @@ Security: [RugCheck](${rugCheckLink})
 Powered By [Solana Hype Alerts](https://t.me/SolanaHypeTokenAlerts)${promoText}`;
 
       try {
-        await teleBot.api.sendMessage(CHANNEL_ID, text, {
+        const message = await teleBot.api.sendMessage(CHANNEL_ID, text, {
           parse_mode: "MarkdownV2",
           // @ts-expect-error Param not found
           disable_web_page_preview: true,
         });
+
+        hypeNewPairs[tokenAddress] = {
+          startTime: now,
+          initialMC: marketCap,
+          pastBenchmark: 1,
+          launchMessage: message.message_id,
+          lpStatus: isLpStatusOkay,
+        };
 
         log(`Sent message for ${address} ${name}`);
       } catch (error) {

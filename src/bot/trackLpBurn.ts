@@ -14,16 +14,14 @@ export async function trackLpBurn(pair: PhotonPairData) {
 
   const { address, tokenAddress, symbol, audit } = pair.attributes;
   const { lp_burned_perc } = audit;
-  const { initialMC, pastBenchmark, startTime, lpStatus } =
-    hypeNewPairs[tokenAddress];
+  const { lpStatus, launchMessage, ...rest } = hypeNewPairs[tokenAddress];
   const isLpStatusOkay = lp_burned_perc === 100;
 
   if (!lpStatus && isLpStatusOkay) {
     hypeNewPairs[tokenAddress] = {
-      initialMC,
-      startTime,
-      pastBenchmark,
       lpStatus: true,
+      launchMessage,
+      ...rest,
     };
 
     // Links
@@ -33,6 +31,8 @@ export async function trackLpBurn(pair: PhotonPairData) {
     const magnumLink = `https://t.me/magnum_trade_bot?start=${tokenAddress}`;
     const bananaLink = `https://t.me/BananaGunSolana_bot?start=${tokenAddress}`;
     const unibot = `https://t.me/solana_unibot?start=${tokenAddress}`;
+    const dexScreenerLink = `https://dexscreener.com/solana/${address}`;
+    const birdEyeLink = `https://birdeye.so/token/${tokenAddress}?chain=solana`;
 
     const text = `Powered By [Solana Hype Alerts](https://t.me/SolanaHypeTokenAlerts)
       
@@ -43,13 +43,15 @@ Token Contract:
 
 Buy:
 [SolTradeBot](${solanaTradingBotLink}) \\| [BonkBot](${bonkBotLink}) \\| [Magnum](${magnumLink})
-[BananaGun](${bananaLink}) \\| [Unibot](${unibot})${promoText}`;
+[BananaGun](${bananaLink}) \\| [Unibot](${unibot})
+[DexScreener](${dexScreenerLink}) \\| [BirdEye](${birdEyeLink})${promoText}`;
 
     teleBot.api
       .sendMessage(CHANNEL_ID, text, {
         parse_mode: "MarkdownV2",
         // @ts-expect-error Param not found
         disable_web_page_preview: true,
+        reply_parameters: { message_id: launchMessage },
       })
       .then(() => log(`Sent message for ${address}`))
       .catch((e) => {

@@ -14,15 +14,15 @@ export async function trackMC(pair: PhotonPairData) {
   }
 
   const { fdv: marketCap, address, tokenAddress, symbol } = pair.attributes;
-  const { initialMC, pastBenchmark, startTime } = hypeNewPairs[tokenAddress];
+  const { initialMC, pastBenchmark, ...rest } = hypeNewPairs[tokenAddress];
   const currentMC = Number(marketCap);
 
   if (initialMC === 0 && currentMC > 0) {
     log(`Token ${tokenAddress} got a non-zero price`);
     hypeNewPairs[tokenAddress] = {
       initialMC: currentMC,
-      startTime,
       pastBenchmark: 1,
+      ...rest,
     };
   } else {
     const exactIncrease = Number((currentMC / initialMC).toFixed(2));
@@ -32,8 +32,8 @@ export async function trackMC(pair: PhotonPairData) {
       log(`Token ${tokenAddress} increased by ${increase}x`);
       hypeNewPairs[tokenAddress] = {
         initialMC,
-        startTime,
         pastBenchmark: increase,
+        ...rest,
       };
 
       // Links
@@ -43,6 +43,8 @@ export async function trackMC(pair: PhotonPairData) {
       const magnumLink = `https://t.me/magnum_trade_bot?start=${tokenAddress}`;
       const bananaLink = `https://t.me/BananaGunSolana_bot?start=${tokenAddress}`;
       const unibot = `https://t.me/solana_unibot?start=${tokenAddress}`;
+      const dexScreenerLink = `https://dexscreener.com/solana/${address}`;
+      const birdEyeLink = `https://birdeye.so/token/${tokenAddress}?chain=solana`;
 
       const text = `Powered By [Solana Hype Alerts](https://t.me/SolanaHypeTokenAlerts)
 
@@ -58,7 +60,8 @@ Token Contract:
 
 Buy:
 [SolTradeBot](${solanaTradingBotLink}) \\| [BonkBot](${bonkBotLink}) \\| [Magnum](${magnumLink})
-[BananaGun](${bananaLink}) \\| [Unibot](${unibot})${promoText}`;
+[BananaGun](${bananaLink}) \\| [Unibot](${unibot})${promoText}
+[DexScreener](${dexScreenerLink}) \\| [BirdEye](${birdEyeLink})${promoText}`;
 
       teleBot.api
         .sendMessage(CHANNEL_ID, text, {

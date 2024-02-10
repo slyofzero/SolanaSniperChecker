@@ -4,5 +4,6 @@ export interface HypeNewPairs {
     initialMC: number;
     pastBenchmark: number;
     lpStatus?: boolean;
+    launchMessage: number;
   };
 }
