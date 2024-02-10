@@ -47,7 +47,8 @@ export async function sendAlert(pairs: PhotonPairData[]) {
     } else if (
       volume >= VOLUME_THRESHOLD &&
       ageMinutes <= AGE_THRESHOLD &&
-      parseFloat(init_liq.quote) >= LIQUIDITY_THRESHOLD
+      parseFloat(init_liq.quote) >= LIQUIDITY_THRESHOLD &&
+      parseFloat(init_liq.quote) <= 50
     ) {
       const {
         fdv: marketCap,
