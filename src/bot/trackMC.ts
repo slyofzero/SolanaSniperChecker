@@ -58,17 +58,17 @@ export async function trackMC() {
 
         const text = `Powered By [Solana Hype Alerts](https://t.me/SolanaHypeTokenAlerts)
 
-    [${hardCleanUpBotMessage(
-      symbol
-    )}](${tokenLink}) jumped by ${cleanUpBotMessage(exactIncrease)}x\\!\\!\\!
+[${hardCleanUpBotMessage(symbol)}](${tokenLink}) jumped by ${cleanUpBotMessage(
+          exactIncrease
+        )}x\\!\\!\\!
 
-    💲 MC when found: $${cleanUpBotMessage(formatToInternational(initialMC))}
-    💲 MC now: $${cleanUpBotMessage(formatToInternational(currentMC))}
+💲 MC when found: $${cleanUpBotMessage(formatToInternational(initialMC))}
+💲 MC now: $${cleanUpBotMessage(formatToInternational(currentMC))}
 
-    Token Contract:
-    \`${tokenAddress}\`
+Token Contract:
+\`${tokenAddress}\`
 
-    [DexScreener](${dexScreenerLink}) \\| [BirdEye](${birdEyeLink})${promoText}`;
+[DexScreener](${dexScreenerLink}) \\| [BirdEye](${birdEyeLink})${promoText}`;
 
         teleBot.api
           .sendMessage(CHANNEL_ID, text, {
