@@ -15,7 +15,6 @@ import { CHANNEL_ID } from "@/utils/env";
 import { errorHandler, log } from "@/utils/handlers";
 import moment from "moment";
 import { PhotonPairData } from "@/types/livePairs";
-import { trackMC } from "./trackMC";
 import { PublicKey } from "@solana/web3.js";
 import { solanaConnection } from "@/rpc";
 import { trackLpBurn } from "./trackLpBurn";
@@ -48,7 +47,6 @@ export async function sendAlert(pairs: PhotonPairData[]) {
       Number(age.replace("a few seconds ago", "1"));
 
     if (hypeNewPairs[tokenAddress]) {
-      trackMC(pair);
       trackLpBurn(pair);
     } else if (
       volume >= VOLUME_THRESHOLD &&
