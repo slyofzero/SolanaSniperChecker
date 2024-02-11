@@ -14,7 +14,8 @@ export async function trackMC(pair: PhotonPairData) {
   }
 
   const { fdv: marketCap, address, tokenAddress, symbol } = pair.attributes;
-  const { initialMC, pastBenchmark, ...rest } = hypeNewPairs[tokenAddress];
+  const { initialMC, pastBenchmark, launchMessage, ...rest } =
+    hypeNewPairs[tokenAddress];
   const currentMC = Number(marketCap);
 
   if (initialMC === 0 && currentMC > 0) {
@@ -22,6 +23,7 @@ export async function trackMC(pair: PhotonPairData) {
     hypeNewPairs[tokenAddress] = {
       initialMC: currentMC,
       pastBenchmark: 1,
+      launchMessage,
       ...rest,
     };
   } else {
@@ -33,6 +35,7 @@ export async function trackMC(pair: PhotonPairData) {
       hypeNewPairs[tokenAddress] = {
         initialMC,
         pastBenchmark: increase,
+        launchMessage,
         ...rest,
       };
 
@@ -60,6 +63,7 @@ Token Contract:
           parse_mode: "MarkdownV2",
           // @ts-expect-error Param not found
           disable_web_page_preview: true,
+          reply_parameters: { message_id: launchMessage },
         })
         .then(() => log(`Sent message for ${address}`))
         .catch((e) => {
