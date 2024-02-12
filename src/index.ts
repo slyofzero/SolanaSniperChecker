@@ -32,12 +32,13 @@ log("Bot instance ready");
       const pairs = (await response.json()) as PhotonPairs;
       await sendAlert(pairs.data);
       trackMC();
-      cleanUpHypePairs();
     } catch (error) {
       errorHandler(error);
     } finally {
-      setTimeout(toRepeat, 30 * 1e3);
+      setTimeout(toRepeat, 60 * 1e3);
     }
+
+    setInterval(cleanUpHypePairs, 60 * 60 * 1e3);
   }
 
   toRepeat();
