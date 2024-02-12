@@ -66,16 +66,15 @@ export async function sendAlert(pairs: PhotonPairData[]) {
 
         // Links
         const tokenLink = `https://solscan.io/token/${tokenAddress}`;
-        const pairLink = `https://solscan.io/account/${address}`;
+        // const pairLink = `https://solscan.io/account/${address}`;
         const dexScreenerLink = `https://dexscreener.com/solana/${address}`;
-        const dexToolsLink = `https://www.dextools.io/app/en/solana/pair-explorer/${address}`;
         const rugCheckLink = `https://rugcheck.xyz/tokens/${tokenAddress}`;
-        const birdEyeLink = `https://birdeye.so/token/${tokenAddress}?chain=solana`;
         const solanaTradingBotLink = `https://t.me/SolanaTradingBot?start=${tokenAddress}`;
         const bonkBotLink = `https://t.me/bonkbot_bot?start=${tokenAddress}`;
         const magnumLink = `https://t.me/magnum_trade_bot?start=${tokenAddress}`;
         const bananaLink = `https://t.me/BananaGunSolana_bot?start=${tokenAddress}`;
         const unibot = `https://t.me/solana_unibot?start=${tokenAddress}`;
+        const photonLink = `https://photon-sol.tinyastro.io/en/r/@solhypealert/${tokenAddress}`;
 
         const now = Math.floor(Date.now() / 1e3);
 
@@ -164,11 +163,11 @@ Token Contract:
 Security: [RugCheck](${rugCheckLink})
 🫧 Socials: ${socialsText}
 
-📊 [DexTools](${dexToolsLink}) 📊 [BirdEye](${birdEyeLink})
-📊 [DexScreener](${dexScreenerLink}) 📊 [SolScan](${pairLink})
+📊 [Photon](${photonLink}) \\| 📊 [DexScreener](${dexScreenerLink})
 
-[SolTradeBot](${solanaTradingBotLink}) \\| [BonkBot](${bonkBotLink}) \\| [Magnum](${magnumLink})
-[BananaGun](${bananaLink}) \\| [Unibot](${unibot})
+Buy:
+[Photon](${photonLink}) \\| [SolTradeBot](${solanaTradingBotLink}) \\| [BonkBot](${bonkBotLink})
+[Magnum](${magnumLink}) \\| [BananaGun](${bananaLink}) \\| [Unibot](${unibot})
 
 Powered By [Solana Hype Alerts](https://t.me/SolanaHypeTokenAlerts)${promoText}`;
 
