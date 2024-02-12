@@ -53,7 +53,8 @@ export async function sendAlert(pairs: PhotonPairData[]) {
         ageMinutes <= AGE_THRESHOLD &&
         parseFloat(init_liq.quote) >= LIQUIDITY_THRESHOLD &&
         parseFloat(init_liq.quote) <= 50 &&
-        marketCap > 0
+        marketCap > 0 &&
+        cur_liq.quote > parseFloat(init_liq.quote)
       ) {
         const {
           address,

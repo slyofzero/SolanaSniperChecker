@@ -26,7 +26,12 @@ export async function trackMC() {
 
       if (!firstPair) return delete hypeNewPairs[token];
 
-      const { fdv: marketCap, pairAddress: address, baseToken } = firstPair;
+      const {
+        fdv: marketCap,
+        pairAddress: address,
+        baseToken,
+        liquidity,
+      } = firstPair;
       const { address: tokenAddress, symbol } = baseToken;
 
       const { initialMC, pastBenchmark, launchMessage, ...rest } =
@@ -45,7 +50,7 @@ export async function trackMC() {
         const exactIncrease = Number((currentMC / initialMC).toFixed(2));
         const increase = Math.floor(exactIncrease);
 
-        if (increase > 1 && increase > pastBenchmark) {
+        if (increase > 1 && increase > pastBenchmark && liquidity.usd >= 1000) {
           log(`Token ${tokenAddress} increased by ${increase}x`);
           hypeNewPairs[token] = {
             initialMC,
