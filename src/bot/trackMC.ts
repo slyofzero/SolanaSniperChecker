@@ -58,6 +58,7 @@ export async function trackMC() {
           const tokenLink = `https://solscan.io/token/${tokenAddress}`;
           const dexScreenerLink = `https://dexscreener.com/solana/${address}`;
           const birdEyeLink = `https://birdeye.so/token/${tokenAddress}?chain=solana`;
+          const photonLink = `https://photon-sol.tinyastro.io/en/r/@solhypealert/${tokenAddress}`;
 
           const text = `Powered By [Solana Hype Alerts](https://t.me/SolanaHypeTokenAlerts)
 
@@ -71,6 +72,7 @@ export async function trackMC() {
 Token Contract:
 \`${tokenAddress}\`
 
+[Photon](${photonLink})
 [DexScreener](${dexScreenerLink}) \\| [BirdEye](${birdEyeLink})${promoText}`;
 
           teleBot.api
