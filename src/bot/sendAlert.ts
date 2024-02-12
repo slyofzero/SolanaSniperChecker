@@ -75,7 +75,7 @@ export async function sendAlert(pairs: PhotonPairData[]) {
         const magnumLink = `https://t.me/magnum_trade_bot?start=${tokenAddress}`;
         const bananaLink = `https://t.me/BananaGunSolana_bot?start=${tokenAddress}`;
         const unibot = `https://t.me/solana_unibot?start=${tokenAddress}`;
-        const photonLink = `https://photon-sol.tinyastro.io/en/r/@solhypealert/${tokenAddress}`;
+        const photonLink = `https://photon-sol.tinyastro.io/en/r/@solhypealerts/${tokenAddress}`;
 
         const now = Math.floor(Date.now() / 1e3);
 
