@@ -9,58 +9,61 @@ import { apiFetcher } from "@/utils/api";
 import { PairDataResponse } from "@/types";
 
 export async function trackMC() {
-  if (!CHANNEL_ID) {
-    log("CHANNEL_ID is undefined");
-    process.exit(1);
-  }
+  try {
+    if (!CHANNEL_ID) {
+      log("CHANNEL_ID is undefined");
+      process.exit(1);
+    }
 
-  for (const token in hypeNewPairs) {
-    const pairData = (
-      await apiFetcher(`https://api.dexscreener.com/latest/dex/tokens/${token}`)
-    ).data as PairDataResponse;
+    for (const token in hypeNewPairs) {
+      const pairData = (
+        await apiFetcher(
+          `https://api.dexscreener.com/latest/dex/tokens/${token}`
+        )
+      ).data as PairDataResponse;
 
-    const firstPair = pairData.pairs.at(0);
+      const firstPair = pairData.pairs?.at(0);
 
-    if (!firstPair) return delete hypeNewPairs[token];
+      if (!firstPair) return delete hypeNewPairs[token];
 
-    const { fdv: marketCap, pairAddress: address, baseToken } = firstPair;
-    const { address: tokenAddress, symbol } = baseToken;
+      const { fdv: marketCap, pairAddress: address, baseToken } = firstPair;
+      const { address: tokenAddress, symbol } = baseToken;
 
-    const { initialMC, pastBenchmark, launchMessage, ...rest } =
-      hypeNewPairs[token];
-    const currentMC = Number(marketCap);
+      const { initialMC, pastBenchmark, launchMessage, ...rest } =
+        hypeNewPairs[token];
+      const currentMC = Number(marketCap);
 
-    if (initialMC === 0 && currentMC > 0) {
-      log(`Token ${tokenAddress} got a non-zero price`);
-      hypeNewPairs[token] = {
-        initialMC: currentMC,
-        pastBenchmark: 1,
-        launchMessage,
-        ...rest,
-      };
-    } else {
-      const exactIncrease = Number((currentMC / initialMC).toFixed(2));
-      const increase = Math.floor(exactIncrease);
-
-      if (increase > 1 && increase > pastBenchmark) {
-        log(`Token ${tokenAddress} increased by ${increase}x`);
+      if (initialMC === 0 && currentMC > 0) {
+        log(`Token ${tokenAddress} got a non-zero price`);
         hypeNewPairs[token] = {
-          initialMC,
-          pastBenchmark: increase,
+          initialMC: currentMC,
+          pastBenchmark: 1,
           launchMessage,
           ...rest,
         };
+      } else {
+        const exactIncrease = Number((currentMC / initialMC).toFixed(2));
+        const increase = Math.floor(exactIncrease);
 
-        // Links
-        const tokenLink = `https://solscan.io/token/${tokenAddress}`;
-        const dexScreenerLink = `https://dexscreener.com/solana/${address}`;
-        const birdEyeLink = `https://birdeye.so/token/${tokenAddress}?chain=solana`;
+        if (increase > 1 && increase > pastBenchmark) {
+          log(`Token ${tokenAddress} increased by ${increase}x`);
+          hypeNewPairs[token] = {
+            initialMC,
+            pastBenchmark: increase,
+            launchMessage,
+            ...rest,
+          };
 
-        const text = `Powered By [Solana Hype Alerts](https://t.me/SolanaHypeTokenAlerts)
+          // Links
+          const tokenLink = `https://solscan.io/token/${tokenAddress}`;
+          const dexScreenerLink = `https://dexscreener.com/solana/${address}`;
+          const birdEyeLink = `https://birdeye.so/token/${tokenAddress}?chain=solana`;
+
+          const text = `Powered By [Solana Hype Alerts](https://t.me/SolanaHypeTokenAlerts)
 
 [${hardCleanUpBotMessage(symbol)}](${tokenLink}) jumped by ${cleanUpBotMessage(
-          exactIncrease
-        )}x\\!\\!\\!
+            exactIncrease
+          )}x\\!\\!\\!
 
 💲 MC when found: $${cleanUpBotMessage(formatToInternational(initialMC))}
 💲 MC now: $${cleanUpBotMessage(formatToInternational(currentMC))}
@@ -70,19 +73,22 @@ Token Contract:
 
 [DexScreener](${dexScreenerLink}) \\| [BirdEye](${birdEyeLink})${promoText}`;
 
-        teleBot.api
-          .sendMessage(CHANNEL_ID, text, {
-            parse_mode: "MarkdownV2",
-            // @ts-expect-error Param not found
-            disable_web_page_preview: true,
-            reply_parameters: { message_id: launchMessage },
-          })
-          .then(() => log(`Sent message for ${address}`))
-          .catch((e) => {
-            log(text);
-            errorHandler(e);
-          });
+          teleBot.api
+            .sendMessage(CHANNEL_ID, text, {
+              parse_mode: "MarkdownV2",
+              // @ts-expect-error Param not found
+              disable_web_page_preview: true,
+              reply_parameters: { message_id: launchMessage },
+            })
+            .then(() => log(`Sent message for ${address}`))
+            .catch((e) => {
+              log(text);
+              errorHandler(e);
+            });
+        }
       }
     }
+  } catch (error) {
+    errorHandler(error);
   }
 }

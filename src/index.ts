@@ -1,6 +1,6 @@
 import { Bot } from "grammy";
 import { initiateBotCommands, initiateCallbackQueries } from "./bot";
-import { log } from "./utils/handlers";
+import { errorHandler, log } from "./utils/handlers";
 import { BOT_TOKEN, DATA_URL, PHOTON_COOKIE } from "./utils/env";
 import { sendAlert } from "./bot/sendAlert";
 import { PhotonPairs } from "./types/livePairs";
@@ -24,16 +24,20 @@ log("Bot instance ready");
   initiateCallbackQueries();
 
   async function toRepeat() {
-    const response = await fetch(DATA_URL || "", {
-      headers: { Cookie: `_photon_ta=${PHOTON_COOKIE}` },
-    });
+    try {
+      const response = await fetch(DATA_URL || "", {
+        headers: { Cookie: `_photon_ta=${PHOTON_COOKIE}` },
+      });
 
-    const pairs = (await response.json()) as PhotonPairs;
-    await sendAlert(pairs.data);
-    trackMC();
-    cleanUpHypePairs();
-
-    setTimeout(toRepeat, 30 * 1e3);
+      const pairs = (await response.json()) as PhotonPairs;
+      await sendAlert(pairs.data);
+      trackMC();
+      cleanUpHypePairs();
+    } catch (error) {
+      errorHandler(error);
+    } finally {
+      setTimeout(toRepeat, 30 * 1e3);
+    }
   }
 
   toRepeat();
