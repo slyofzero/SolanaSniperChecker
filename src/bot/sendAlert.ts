@@ -65,6 +65,33 @@ export async function sendAlert(pairs: PhotonPairData[]) {
           audit,
         } = pair.attributes;
 
+        const token = new PublicKey(tokenAddress);
+        const addresses = await solanaConnection.getTokenLargestAccounts(token);
+        const totalSupply = (
+          await solanaConnection.getTokenSupply(new PublicKey(tokenAddress))
+        ).value.uiAmount;
+        const balances = addresses.value.slice(0, 10);
+        let top2Hold = 0;
+        let top10Hold = 0;
+        const balancesText = balances
+          .map((balance, index) => {
+            const address = balance?.address.toString();
+
+            if (balance.uiAmount && totalSupply) {
+              const held = ((balance.uiAmount / totalSupply) * 100).toFixed(2);
+              if (index < 2) top2Hold += parseFloat(held);
+              top10Hold += parseFloat(held);
+              const percHeld = cleanUpBotMessage(held);
+              return `[${percHeld}%](https://solscan.io/account/${address})`;
+            }
+          })
+          .slice(0, 5)
+          .join(" \\| ");
+
+        console.log(top2Hold, top10Hold);
+
+        if (top2Hold >= 70) continue;
+
         // Links
         const tokenLink = `https://solscan.io/token/${tokenAddress}`;
         // const pairLink = `https://solscan.io/account/${address}`;
@@ -104,28 +131,6 @@ export async function sendAlert(pairs: PhotonPairData[]) {
           formatToInternational(cur_liq.usd)
         );
         const hypeScore = getRandomInteger();
-
-        const totalSupply = (
-          await solanaConnection.getTokenSupply(new PublicKey(tokenAddress))
-        ).value.uiAmount;
-
-        const token = new PublicKey(tokenAddress);
-        const addresses = await solanaConnection.getTokenLargestAccounts(token);
-        const balances = addresses.value.slice(0, 10);
-        let top10Hold = 0;
-        const balancesText = balances
-          .map((balance) => {
-            const address = balance?.address.toString();
-
-            if (balance.uiAmount && totalSupply) {
-              const held = ((balance.uiAmount / totalSupply) * 100).toFixed(2);
-              top10Hold += parseFloat(held);
-              const percHeld = cleanUpBotMessage(held);
-              return `[${percHeld}%](https://solscan.io/account/${address})`;
-            }
-          })
-          .slice(0, 5)
-          .join(" \\| ");
 
         // Audit
         const { lp_burned_perc, mint_authority } = audit;
