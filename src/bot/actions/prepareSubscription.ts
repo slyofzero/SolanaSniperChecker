@@ -2,7 +2,7 @@ import { addDocument, getDocument, updateDocumentById } from "@/firebase";
 import { StoredAccount } from "@/types/accounts";
 import { Subscriber } from "@/types/subscriber";
 import { encrypt } from "@/utils/cryptography";
-import { errorHandler } from "@/utils/handlers";
+import { errorHandler, log } from "@/utils/handlers";
 import { generateAccount } from "@/utils/web3";
 import { subscriptionTiers } from "@/vars/subscribers";
 import { Timestamp } from "firebase-admin/firestore";
@@ -82,6 +82,8 @@ Address - \`${publicKey}\``;
       collectionName: "subscribers",
       id: hash,
     });
+
+    log(`Pepared payment ${hash}`);
 
     return true;
   } catch (error) {
