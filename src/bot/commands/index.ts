@@ -23,6 +23,7 @@ export function initiateBotCommands() {
     }
 
     const member = ctx.from;
+
     const userSubscription = subscribers.find(
       ({ user, status }) => user === member.id && status === "PAID"
     );

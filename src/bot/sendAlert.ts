@@ -88,8 +88,6 @@ export async function sendAlert(pairs: PhotonPairData[]) {
           .slice(0, 5)
           .join(" \\| ");
 
-        console.log(top2Hold, top10Hold);
-
         if (top2Hold >= 70) continue;
 
         // Links
