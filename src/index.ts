@@ -24,12 +24,16 @@ teleBot.use(chatMembers(adapter));
 
 (async function () {
   rpcConfig();
-  teleBot.start({ allowed_updates: ["chat_member"] });
+  await Promise.all([syncSubscribers()]);
+
+  teleBot.start({
+    allowed_updates: ["chat_member", "message", "callback_query"],
+  });
   log("Telegram bot setup");
   initiateBotCommands();
   initiateCallbackQueries();
 
-  await Promise.all([syncSubscribers()]);
+  // teleBot.api.unbanChatMember(CHANNEL_ID || "", 1323009138);
 
   async function toRepeat() {
     try {

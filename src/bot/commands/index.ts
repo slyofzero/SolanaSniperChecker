@@ -4,15 +4,18 @@ import { log } from "@/utils/handlers";
 import { promo } from "./promo";
 import { subscribers } from "@/vars/subscribers";
 import { CHANNEL_ID } from "@/utils/env";
+import { subscription } from "./subscription";
 
 export function initiateBotCommands() {
   teleBot.api.setMyCommands([
     { command: "start", description: "Start the bot" },
-    { command: "promo", description: "Set a promo text" },
+    // { command: "promo", description: "Set a promo text" },
+    { command: "subscribe", description: "To subscribe to the bot" },
   ]);
 
   teleBot.command("start", (ctx) => startBot(ctx));
   teleBot.command("promo", (ctx) => promo(ctx));
+  teleBot.command("subscribe", (ctx) => subscription(ctx));
 
   teleBot.on("chat_member", async (ctx) => {
     if (!CHANNEL_ID) {

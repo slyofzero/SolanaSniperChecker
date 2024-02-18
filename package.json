@@ -32,9 +32,12 @@
     "@grammyjs/chat-members": "^1.0.12",
     "@solana/web3.js": "^1.90.0",
     "dotenv": "^16.3.1",
+    "ethers": "^5.7.2",
     "firebase-admin": "^12.0.0",
     "grammy": "^1.20.3",
     "moment": "^2.29.4",
+    "nanoid": "^3.3.7",
+    "tweetnacl": "^1.0.3",
     "ws": "^8.16.0"
   }
 }

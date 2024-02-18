@@ -19,3 +19,32 @@ export function getRandomInteger() {
 
   return scaled;
 }
+
+// eslint-disable-next-line
+export function replicate(obj: any) {
+  return JSON.parse(JSON.stringify(obj));
+}
+
+export function formatNumber(num: string | number) {
+  if (isNaN(Number(num))) return num;
+  num = Number(num);
+
+  const formatter = new Intl.NumberFormat("en-US", {
+    notation: "compact",
+    compactDisplay: "short",
+    minimumFractionDigits: 1,
+    maximumFractionDigits: 1,
+  });
+
+  return formatter.format(num);
+}
+
+export function roundUpToDecimalPlace(
+  number: string | number,
+  decimalPlaces: number
+) {
+  number = Number(number);
+
+  const factor = 10 ** decimalPlaces;
+  return Math.ceil(number * factor) / factor;
+}

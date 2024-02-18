@@ -9,4 +9,5 @@ export const {
   PHOTON_COOKIE,
   RPC_ENDPOINT,
   FIREBASE_KEY,
+  ENCRYPTION_KEY,
 } = process.env;

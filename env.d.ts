@@ -8,6 +8,7 @@ declare global {
       PHOTON_COOKIE: string | undefined;
       RPC_ENDPOINT: string | undefined;
       FIREBASE_KEY: string | undefined;
+      ENCRYPTION_KEY: string | undefined;
     }
   }
 }
