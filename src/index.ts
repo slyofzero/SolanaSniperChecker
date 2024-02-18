@@ -10,6 +10,7 @@ import { cleanUpHypePairs } from "./bot/cleanUpHypePairs";
 import { trackMC } from "./bot/trackMC";
 import { chatMembers, type ChatMembersFlavor } from "@grammyjs/chat-members";
 import { syncSubscribers } from "./vars/subscribers";
+import { cleanUpSubscriptions } from "./bot/cleanUpSubscriptions";
 
 if (!BOT_TOKEN || !DATA_URL) {
   log("BOT_TOKEN or WSS_URL or DATA_URL is missing");
@@ -33,8 +34,6 @@ teleBot.use(chatMembers(adapter));
   initiateBotCommands();
   initiateCallbackQueries();
 
-  // teleBot.api.unbanChatMember(CHANNEL_ID || "", 1323009138);
-
   async function toRepeat() {
     try {
       const response = await fetch(DATA_URL || "", {
@@ -54,4 +53,5 @@ teleBot.use(chatMembers(adapter));
   }
 
   toRepeat();
+  setInterval(cleanUpSubscriptions, 30 * 1e3);
 })();

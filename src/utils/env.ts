@@ -10,4 +10,5 @@ export const {
   RPC_ENDPOINT,
   FIREBASE_KEY,
   ENCRYPTION_KEY,
+  BOT_INVITE_LINK,
 } = process.env;

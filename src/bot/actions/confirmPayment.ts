@@ -11,9 +11,15 @@ import { solanaConnection } from "@/rpc";
 import { Timestamp } from "firebase-admin/firestore";
 import { subscriptionTiers, syncSubscribers } from "@/vars/subscribers";
 import { splitPayment } from "@/utils/web3";
-import { cleanUpBotMessage } from "@/utils/bot";
+import { cleanUpBotMessage, hardCleanUpBotMessage } from "@/utils/bot";
+import { BOT_INVITE_LINK, CHANNEL_ID } from "@/utils/env";
+import { teleBot } from "@/index";
 
 export async function confirmPayment(ctx: CallbackQueryContext<Context>) {
+  if (!CHANNEL_ID) {
+    return log("CHANNEL_ID is undefined");
+  }
+
   const from = ctx.from;
   const callbackData = ctx.callbackQuery.data;
   const hash = callbackData.split("-").at(-1);
@@ -35,7 +41,7 @@ export async function confirmPayment(ctx: CallbackQueryContext<Context>) {
     );
   }
 
-  const { paidAt, paidTo, tier } = subscriberData;
+  const { paidAt, paidTo, tier, user } = subscriberData;
   const selectedTier = subscriptionTiers[tier];
   const timeSpent = getSecondsElapsed(paidAt.seconds);
 
@@ -68,9 +74,10 @@ export async function confirmPayment(ctx: CallbackQueryContext<Context>) {
   );
 
   const text = `Checking for payment of \`${selectedTier.amount}\` SOL for payment hash \`${hash}\`. You'd be notified as soon as the payment is confirmed.`;
-  ctx
-    .reply(cleanUpBotMessage(text), { parse_mode: "MarkdownV2" })
-    .then(() => ctx.deleteMessage());
+  const confirmingMessage = await ctx.reply(cleanUpBotMessage(text), {
+    parse_mode: "MarkdownV2",
+  });
+  ctx.deleteMessage();
 
   attemptsCheck: for (const attempt_number of Array.from(Array(20).keys())) {
     try {
@@ -111,10 +118,18 @@ export async function confirmPayment(ctx: CallbackQueryContext<Context>) {
         .then(() => log(`Unlocked account after trend payment ${hash}`))
         .catch((e) => errorHandler(e));
 
-      const confirmationText = `Confirmed payment of \`${selectedTier.amount}\` SOL for a subscription of ${selectedTier.text}. Your payment hash was \`${hash}\`.`;
-      ctx.reply(cleanUpBotMessage(confirmationText), {
-        parse_mode: "MarkdownV2",
-      });
+      const confirmationText = `Confirmed payment of \`${cleanUpBotMessage(
+        selectedTier.amount
+      )}\` SOL for a subscription of ${cleanUpBotMessage(
+        selectedTier.text
+      )}\\. Your payment hash was \`${hash}\`\\. Use the below link to join the private channel \\-\n\n${hardCleanUpBotMessage(
+        BOT_INVITE_LINK
+      )}`;
+      ctx
+        .reply(confirmationText, {
+          parse_mode: "MarkdownV2",
+        })
+        .then(() => ctx.deleteMessages([confirmingMessage.message_id]));
 
       // Splitting payment
       splitPayment(secretKey, selectedTier.amount * LAMPORTS_PER_SOL)
@@ -122,6 +137,8 @@ export async function confirmPayment(ctx: CallbackQueryContext<Context>) {
           log("Amount split between share holders");
         })
         .catch((e) => errorHandler(e));
+
+      teleBot.api.unbanChatMember(CHANNEL_ID, user);
 
       return false;
     } catch (error) {

@@ -9,6 +9,7 @@ declare global {
       RPC_ENDPOINT: string | undefined;
       FIREBASE_KEY: string | undefined;
       ENCRYPTION_KEY: string | undefined;
+      BOT_INVITE_LINK: string | undefined;
     }
   }
 }
