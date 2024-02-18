@@ -146,4 +146,7 @@ export async function confirmPayment(ctx: CallbackQueryContext<Context>) {
       await sleep(30000);
     }
   }
+
+  const failedText = `Your payment wasn't confirmed. Please contact the admins and provide your payment hash - ${hash}`;
+  ctx.reply(failedText);
 }
