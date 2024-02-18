@@ -11,6 +11,7 @@ import { trackMC } from "./bot/trackMC";
 import { chatMembers, type ChatMembersFlavor } from "@grammyjs/chat-members";
 import { syncSubscribers } from "./vars/subscribers";
 import { cleanUpSubscriptions } from "./bot/cleanUpSubscriptions";
+import { unlockUnusedAccounts } from "./bot/unlockUnusedAccounts";
 
 if (!BOT_TOKEN || !DATA_URL) {
   log("BOT_TOKEN or WSS_URL or DATA_URL is missing");
@@ -51,6 +52,9 @@ teleBot.use(chatMembers(adapter));
   }
 
   toRepeat();
-  setInterval(cleanUpHypePairs, 60 * 60 * 1e3);
-  setInterval(cleanUpSubscriptions, 30 * 1e3);
+  setInterval(() => {
+    cleanUpHypePairs();
+    cleanUpSubscriptions();
+    unlockUnusedAccounts();
+  }, 60 * 60 * 1e3);
 })();
