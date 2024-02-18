@@ -77,7 +77,6 @@ export async function confirmPayment(ctx: CallbackQueryContext<Context>) {
   const confirmingMessage = await ctx.reply(cleanUpBotMessage(text), {
     parse_mode: "MarkdownV2",
   });
-  ctx.deleteMessage();
 
   attemptsCheck: for (const attempt_number of Array.from(Array(20).keys())) {
     try {
@@ -95,7 +94,7 @@ export async function confirmPayment(ctx: CallbackQueryContext<Context>) {
       log(logText);
       const currentTimestamp = Timestamp.now();
 
-      updateDocumentById({
+      const updateSubscription = updateDocumentById({
         updates: {
           status: "PAID",
           paidAt: currentTimestamp,
@@ -106,16 +105,17 @@ export async function confirmPayment(ctx: CallbackQueryContext<Context>) {
         },
         collectionName: "subscribers",
         id: hash,
-      })
-        .then(() => syncSubscribers())
-        .catch((e) => errorHandler(e));
+      });
 
-      updateDocumentById({
+      const unlockAccount = updateDocumentById({
         updates: { locked: false },
         collectionName: "accounts",
         id: accountID || "",
-      })
-        .then(() => log(`Unlocked account after trend payment ${hash}`))
+      });
+
+      // Splitting payment
+      splitPayment(secretKey, selectedTier.amount * LAMPORTS_PER_SOL)
+        .then(() => log("Amount split between share holders"))
         .catch((e) => errorHandler(e));
 
       const confirmationText = `Confirmed payment of \`${cleanUpBotMessage(
@@ -125,22 +125,22 @@ export async function confirmPayment(ctx: CallbackQueryContext<Context>) {
       )}\\. Your payment hash was \`${hash}\`\\. Use the below link to join the private channel \\-\n\n${hardCleanUpBotMessage(
         BOT_INVITE_LINK
       )}`;
-      ctx
-        .reply(confirmationText, {
-          parse_mode: "MarkdownV2",
-        })
-        .then(() => ctx.deleteMessages([confirmingMessage.message_id]));
 
-      // Splitting payment
-      splitPayment(secretKey, selectedTier.amount * LAMPORTS_PER_SOL)
+      await Promise.all([updateSubscription, unlockAccount]);
+      syncSubscribers()
+        .then(() => teleBot.api.unbanChatMember(CHANNEL_ID || "", user))
         .then(() => {
-          log("Amount split between share holders");
+          ctx.reply(confirmationText, {
+            parse_mode: "MarkdownV2",
+          });
+        })
+        .then(() => {
+          ctx.deleteMessage();
+          ctx.deleteMessages([confirmingMessage.message_id]);
         })
         .catch((e) => errorHandler(e));
 
-      teleBot.api.unbanChatMember(CHANNEL_ID, user);
-
-      return false;
+      return true;
     } catch (error) {
       errorHandler(error);
       await sleep(30000);

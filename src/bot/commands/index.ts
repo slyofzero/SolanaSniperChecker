@@ -23,11 +23,11 @@ export function initiateBotCommands() {
     }
 
     const member = ctx.from;
+    const userSubscription = subscribers.find(
+      ({ user, status }) => user === member.id && status === "PAID"
+    );
 
-    const userSubscription = subscribers.find(({ user }) => user === member.id);
-    const shouldBanUser =
-      !member.is_bot &&
-      (!userSubscription || userSubscription.status !== "PAID");
+    const shouldBanUser = !member.is_bot && !userSubscription;
 
     if (shouldBanUser) {
       ctx.banChatMember(member.id);

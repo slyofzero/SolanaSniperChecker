@@ -48,10 +48,9 @@ teleBot.use(chatMembers(adapter));
     } finally {
       setTimeout(toRepeat, 60 * 1e3);
     }
-
-    setInterval(cleanUpHypePairs, 60 * 60 * 1e3);
   }
 
   toRepeat();
+  setInterval(cleanUpHypePairs, 60 * 60 * 1e3);
   setInterval(cleanUpSubscriptions, 30 * 1e3);
 })();
