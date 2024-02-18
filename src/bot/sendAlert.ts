@@ -132,10 +132,16 @@ export async function sendAlert(pairs: PhotonPairData[]) {
 
         // Audit
         const { lp_burned_perc, mint_authority } = audit;
-        const mintStatus = !mint_authority ? "❌" : "✅";
+        const mintStatus = !mint_authority ? "🟥" : "🟩";
         const mintText = !mint_authority ? "Enabled" : "Disabled";
         const isLpStatusOkay = lp_burned_perc === 100;
-        const lpStatus = isLpStatusOkay ? "✅" : "❌";
+        const lpStatus = isLpStatusOkay ? "🟩" : "⚠️";
+        const issues = Number(!isLpStatusOkay) + Number(!mint_authority);
+        const issuesText = issues === 1 ? `1 issue` : `${issues} issues`;
+        const score =
+          isLpStatusOkay && mint_authority
+            ? `Good \\(${issuesText}\\) 🟢🟢🟢`
+            : `Bad \\(${issuesText}\\) 🔴🔴🔴`;
 
         const lpText = isLpStatusOkay
           ? "All LP Tokens burnt"
@@ -158,6 +164,7 @@ Supply: ${cleanUpBotMessage(formatToInternational(totalSupply || 0))}
 👥 Top Holders:
 ${balancesText}
 
+🧠 Score: ${score}
 ${mintStatus} Mint: ${mintText}
 ${lpStatus} LP status: ${lpText}
 
