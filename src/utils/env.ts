@@ -8,4 +8,5 @@ export const {
   DATA_URL,
   PHOTON_COOKIE,
   RPC_ENDPOINT,
+  FIREBASE_KEY,
 } = process.env;
