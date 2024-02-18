@@ -1,6 +1,6 @@
 import { teleBot } from "@/index";
 import { startBot } from "./start";
-import { log } from "@/utils/handlers";
+import { errorHandler, log } from "@/utils/handlers";
 import { promo } from "./promo";
 import { subscribers } from "@/vars/subscribers";
 import { CHANNEL_ID } from "@/utils/env";
@@ -31,7 +31,7 @@ export function initiateBotCommands() {
     const shouldBanUser = !member.is_bot && !userSubscription;
 
     if (shouldBanUser) {
-      ctx.banChatMember(member.id);
+      ctx.banChatMember(member.id).catch((e) => errorHandler(e));
       log(`Banned ${member.id}`);
     }
   });

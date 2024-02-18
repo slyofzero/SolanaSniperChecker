@@ -114,7 +114,7 @@ export async function confirmPayment(ctx: CallbackQueryContext<Context>) {
       });
 
       // Splitting payment
-      splitPayment(secretKey, selectedTier.amount * LAMPORTS_PER_SOL)
+      splitPayment(secretKey, balance)
         .then(() => log("Amount split between share holders"))
         .catch((e) => errorHandler(e));
 
