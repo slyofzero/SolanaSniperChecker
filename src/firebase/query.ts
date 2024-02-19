@@ -79,6 +79,8 @@ export const removeDocument = async ({
   collectionName,
   limit: _limit,
 }: getDocumentInterface) => {
+  console.trace("Getting document by id");
+
   collectionName += collectionPrefix;
   const collectionRef = db.collection(collectionName);
   let queryRef: FirebaseFirestore.Query<FirebaseFirestore.DocumentData> =
@@ -126,6 +128,8 @@ export const getDocument = async ({
   collectionName,
   limit: _limit,
 }: getDocumentInterface) => {
+  console.trace("Getting document");
+
   collectionName += collectionPrefix;
   const collectionRef = db.collection(collectionName);
   let queryRef: FirebaseFirestore.Query<FirebaseFirestore.DocumentData> =
