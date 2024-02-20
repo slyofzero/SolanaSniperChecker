@@ -19,6 +19,7 @@ import { PublicKey } from "@solana/web3.js";
 import { solanaConnection } from "@/rpc";
 import { trackLpBurn } from "./trackLpBurn";
 import { promoText } from "@/vars/promo";
+import { apiFetcher } from "@/utils/api";
 
 export async function sendAlert(pairs: PhotonPairData[]) {
   try {
@@ -70,6 +71,17 @@ export async function sendAlert(pairs: PhotonPairData[]) {
         const totalSupply = (
           await solanaConnection.getTokenSupply(new PublicKey(tokenAddress))
         ).value.uiAmount;
+
+        const priceData = // eslint-disable-next-line
+          (
+            await apiFetcher(
+              `https://api.dexscreener.com/latest/dex/tokens/${tokenAddress}`
+            )
+          ).data as any;
+        const price = parseFloat(priceData.pairs.at(0).priceUsd);
+        const circulatingSupply = marketCap / price;
+        console.log(circulatingSupply);
+
         const balances = addresses.value.slice(0, 10);
         let top2Hold = 0;
         let top10Hold = 0;
@@ -141,6 +153,8 @@ export async function sendAlert(pairs: PhotonPairData[]) {
         const score =
           isLpStatusOkay && mint_authority
             ? `Good \\(${issuesText}\\) 🟢🟢🟢`
+            : issues === 1
+            ? `Bad \\(${issuesText}\\) 🟡🟡🟡`
             : `Bad \\(${issuesText}\\) 🔴🔴🔴`;
 
         const lpText = isLpStatusOkay

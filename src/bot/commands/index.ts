@@ -17,24 +17,24 @@ export function initiateBotCommands() {
   teleBot.command("promo", (ctx) => promo(ctx));
   teleBot.command("subscribe", (ctx) => subscription(ctx));
 
-  teleBot.on("chat_member", async (ctx) => {
-    if (!CHANNEL_ID) {
-      return log("CHANNEL_ID is undefined");
-    }
+  // teleBot.on("chat_member", async (ctx) => {
+  //   if (!CHANNEL_ID) {
+  //     return log("CHANNEL_ID is undefined");
+  //   }
 
-    const member = ctx.from;
+  //   const member = ctx.from;
 
-    const userSubscription = subscribers.find(
-      ({ user, status }) => user === member.id && status === "PAID"
-    );
+  //   const userSubscription = subscribers.find(
+  //     ({ user, status }) => user === member.id && status === "PAID"
+  //   );
 
-    const shouldBanUser = !member.is_bot && !userSubscription;
+  //   const shouldBanUser = !member.is_bot && !userSubscription;
 
-    if (shouldBanUser) {
-      ctx.banChatMember(member.id).catch((e) => errorHandler(e));
-      log(`Banned ${member.id}`);
-    }
-  });
+  //   if (shouldBanUser) {
+  //     ctx.banChatMember(member.id).catch((e) => errorHandler(e));
+  //     log(`Banned ${member.id}`);
+  //   }
+  // });
 
   log("Bot commands up");
 }
