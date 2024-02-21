@@ -11,7 +11,7 @@ import {
 import { hypeNewPairs, setIndexedTokens } from "@/vars/tokens";
 import { teleBot } from "..";
 import { cleanUpBotMessage, hardCleanUpBotMessage } from "@/utils/bot";
-import { CHANNEL_ID } from "@/utils/env";
+import { CHANNEL_ID, PUBLIC_CHANNEL_ID } from "@/utils/env";
 import { errorHandler, log } from "@/utils/handlers";
 import moment from "moment";
 import { PhotonPairData } from "@/types/livePairs";
@@ -19,7 +19,7 @@ import { PublicKey } from "@solana/web3.js";
 import { solanaConnection } from "@/rpc";
 import { trackLpBurn } from "./trackLpBurn";
 import { promoText } from "@/vars/promo";
-import { apiFetcher } from "@/utils/api";
+import { sleep } from "@/utils/time";
 
 export async function sendAlert(pairs: PhotonPairData[]) {
   try {
@@ -72,15 +72,15 @@ export async function sendAlert(pairs: PhotonPairData[]) {
           await solanaConnection.getTokenSupply(new PublicKey(tokenAddress))
         ).value.uiAmount;
 
-        const priceData = // eslint-disable-next-line
-          (
-            await apiFetcher(
-              `https://api.dexscreener.com/latest/dex/tokens/${tokenAddress}`
-            )
-          ).data as any;
-        const price = parseFloat(priceData.pairs.at(0).priceUsd);
-        const circulatingSupply = marketCap / price;
-        console.log(circulatingSupply);
+        // const priceData = // eslint-disable-next-line
+        //   (
+        //     await apiFetcher(
+        //       `https://api.dexscreener.com/latest/dex/tokens/${tokenAddress}`
+        //     )
+        //   ).data as any;
+        // const price = parseFloat(priceData.pairs.at(0).priceUsd);
+        // const circulatingSupply = marketCap / price;
+        // console.log(circulatingSupply);
 
         const balances = addresses.value.slice(0, 10);
         let top2Hold = 0;
@@ -201,6 +201,15 @@ Powered By [Solana Hype Alerts](https://t.me/SolanaHypeTokenAlerts)${promoText}`
             parse_mode: "MarkdownV2",
             // @ts-expect-error Param not found
             disable_web_page_preview: true,
+          });
+
+          sleep(40 * 1e3).then(() => {
+            if (PUBLIC_CHANNEL_ID)
+              teleBot.api.sendMessage(PUBLIC_CHANNEL_ID, text, {
+                parse_mode: "MarkdownV2",
+                // @ts-expect-error Param not found
+                disable_web_page_preview: true,
+              });
           });
 
           hypeNewPairs[tokenAddress] = {
