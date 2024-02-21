@@ -203,14 +203,17 @@ Powered By [Solana Hype Alerts](https://t.me/SolanaHypeTokenAlerts)${promoText}`
             disable_web_page_preview: true,
           });
 
-          sleep(40 * 1e3).then(() => {
-            if (PUBLIC_CHANNEL_ID)
-              teleBot.api.sendMessage(PUBLIC_CHANNEL_ID, text, {
-                parse_mode: "MarkdownV2",
-                // @ts-expect-error Param not found
-                disable_web_page_preview: true,
-              });
-          });
+          sleep(40 * 1e3)
+            .then(() => {
+              if (PUBLIC_CHANNEL_ID)
+                teleBot.api.sendMessage(PUBLIC_CHANNEL_ID, text, {
+                  parse_mode: "MarkdownV2",
+                  // @ts-expect-error Param not found
+                  disable_web_page_preview: true,
+                });
+            })
+            .then(() => log(`Sent message for ${name} to public`))
+            .catch((e) => errorHandler(e));
 
           hypeNewPairs[tokenAddress] = {
             startTime: now,
