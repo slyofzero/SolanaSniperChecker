@@ -1,6 +1,7 @@
 import {
   AGE_THRESHOLD,
   LIQUIDITY_THRESHOLD,
+  PUBLIC_CHANNEL_DELAY,
   VOLUME_THRESHOLD,
 } from "@/utils/constants";
 import {
@@ -19,7 +20,6 @@ import { PublicKey } from "@solana/web3.js";
 import { solanaConnection } from "@/rpc";
 import { trackLpBurn } from "./trackLpBurn";
 import { promoText } from "@/vars/promo";
-import { sleep } from "@/utils/time";
 
 export async function sendAlert(pairs: PhotonPairData[]) {
   try {
@@ -203,17 +203,14 @@ Powered By [Solana Hype Alerts](https://t.me/SolanaHypeTokenAlerts)${promoText}`
             disable_web_page_preview: true,
           });
 
-          sleep(40 * 1e3)
-            .then(() => {
-              if (PUBLIC_CHANNEL_ID)
-                teleBot.api.sendMessage(PUBLIC_CHANNEL_ID, text, {
-                  parse_mode: "MarkdownV2",
-                  // @ts-expect-error Param not found
-                  disable_web_page_preview: true,
-                });
-            })
-            .then(() => log(`Sent message for ${name} to public`))
-            .catch((e) => errorHandler(e));
+          setTimeout(() => {
+            if (PUBLIC_CHANNEL_ID)
+              teleBot.api.sendMessage(PUBLIC_CHANNEL_ID, text, {
+                parse_mode: "MarkdownV2",
+                // @ts-expect-error Param not found
+                disable_web_page_preview: true,
+              });
+          }, PUBLIC_CHANNEL_DELAY * 1e3);
 
           hypeNewPairs[tokenAddress] = {
             startTime: now,

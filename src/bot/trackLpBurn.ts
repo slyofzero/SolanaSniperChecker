@@ -5,7 +5,7 @@ import { hypeNewPairs } from "@/vars/tokens";
 import { errorHandler, log } from "@/utils/handlers";
 import { PhotonPairData } from "@/types/livePairs";
 import { promoText } from "@/vars/promo";
-import { sleep } from "@/utils/time";
+import { PUBLIC_CHANNEL_DELAY } from "@/utils/constants";
 
 export async function trackLpBurn(pair: PhotonPairData) {
   try {
@@ -50,19 +50,19 @@ Token Contract:
           reply_parameters: { message_id: launchMessage },
         })
         .then(() => log(`Sent message for ${address}`))
-        .then(() => sleep(40 * 1e3))
-        .then(() => {
-          if (PUBLIC_CHANNEL_ID)
-            teleBot.api.sendMessage(PUBLIC_CHANNEL_ID, text, {
-              parse_mode: "MarkdownV2",
-              // @ts-expect-error Param not found
-              disable_web_page_preview: true,
-            });
-        })
         .catch((e) => {
           log(text);
           errorHandler(e);
         });
+
+      setTimeout(() => {
+        if (PUBLIC_CHANNEL_ID)
+          teleBot.api.sendMessage(PUBLIC_CHANNEL_ID, text, {
+            parse_mode: "MarkdownV2",
+            // @ts-expect-error Param not found
+            disable_web_page_preview: true,
+          });
+      }, PUBLIC_CHANNEL_DELAY * 1e3);
     }
   } catch (error) {
     errorHandler(error);
