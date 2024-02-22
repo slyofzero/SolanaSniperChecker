@@ -1,0 +1,30 @@
+{
+  "id": "138505",
+  "type": "",
+  "attributes": {
+    "volume": 24819.59848132017,
+    "buys_count": 182,
+    "sells_count": 55,
+    "address": "3oU2ngGarQzESJtXMPWm2q3f6zPyyV9stDvg14CzHE4v",
+    "tokenAddress": "CwYqnQGNH2pynihuyBjN29SHJk7tVv72kLsyauHW1V9j",
+    "fdv": 12908.90682535262,
+    "name": "Sora Snowdogs",
+    "symbol": "SNOW",
+    "created_timestamp": 1708503790,
+    "open_timestamp": 1708503783,
+    "init_liq": {
+      "usd": "2098.153598014119",
+      "quote": "20.0",
+      "lp_amount": 894426190999,
+      "timestamp": 1708503790,
+      "open_timestamp": 1708503783
+    },
+    "cur_liq": { "quote": 63.17735294563154, "usd": 6627.789519794237 },
+    "audit": {
+      "mint_authority": false,
+      "lp_burned_perc": 0,
+      "top_holders_perc": 40.961
+    },
+    "socials": null
+  }
+}
