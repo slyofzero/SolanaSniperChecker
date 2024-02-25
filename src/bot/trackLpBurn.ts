@@ -36,9 +36,6 @@ export async function trackLpBurn(pair: PhotonPairData) {
       
 [${hardCleanUpBotMessage(symbol)}](${tokenLink}) LP tokens burnt 🔥🔥🔥 
 
-Token Contract:
-\`${tokenAddress}\`
-
 [Photon](${photonLink})
 [DexScreener](${dexScreenerLink}) \\| [BirdEye](${birdEyeLink})${promoText}`;
 

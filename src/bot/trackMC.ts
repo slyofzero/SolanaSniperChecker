@@ -75,9 +75,6 @@ export async function trackMC() {
 💲 MC when found: $${cleanUpBotMessage(formatToInternational(initialMC))}
 💲 MC now: $${cleanUpBotMessage(formatToInternational(currentMC))}
 
-Token Contract:
-\`${tokenAddress}\`
-
 [Photon](${photonLink})
 [DexScreener](${dexScreenerLink}) \\| [BirdEye](${birdEyeLink})${promoText}`;
 
