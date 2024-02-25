@@ -2,9 +2,10 @@ import { addDocument, getDocument, updateDocumentById } from "@/firebase";
 import { StoredAccount } from "@/types/accounts";
 import { Subscriber } from "@/types/subscriber";
 import { encrypt } from "@/utils/cryptography";
+import { replicate } from "@/utils/general";
 import { errorHandler, log } from "@/utils/handlers";
 import { generateAccount } from "@/utils/web3";
-import { subscriptionTiers } from "@/vars/subscribers";
+import { subscribers, subscriptionTiers } from "@/vars/subscribers";
 import { Timestamp } from "firebase-admin/firestore";
 import { CallbackQueryContext, Context, InlineKeyboard } from "grammy";
 import { nanoid } from "nanoid";
@@ -23,6 +24,10 @@ export async function prepareSubscription(ctx: CallbackQueryContext<Context>) {
 
     const selectedTier = subscriptionTiers[tier];
     const userId = from.id;
+    const userSubscriptions = subscribers.filter(
+      ({ user, status }) => user == userId && status === "PAID"
+    );
+    const isSubscribed = userSubscriptions.length > 0;
 
     const notLockedAccount =
       ((
@@ -54,7 +59,9 @@ export async function prepareSubscription(ctx: CallbackQueryContext<Context>) {
       addDocument({ data: newAccountData, collectionName: "accounts" });
     }
 
-    const hash = nanoid(10).replace(/-/g, "a");
+    const subscription = replicate(userSubscriptions.at(0) || {}) as Subscriber;
+    const { id } = subscription;
+    const hash = isSubscribed ? id : nanoid(10).replace(/-/g, "a");
     let text = `You have selected subscription for ${selectedTier.text}.
 The total cost - \`${selectedTier.amount}\` SOL
 
@@ -76,21 +83,40 @@ Address - \`${publicKey}\``;
       .catch((e) => errorHandler(e));
 
     try {
-      const paymentData: Subscriber = {
+      let paymentData: Subscriber = {
         paidAt: Timestamp.now(),
         paidTo: publicKey,
         tier,
         user: userId,
-        status: "PENDING",
+        status: isSubscribed ? "PAID" : "PENDING",
       };
 
-      await addDocument({
-        data: paymentData,
-        collectionName: "subscribers",
-        id: hash,
-      });
+      if (isSubscribed) {
+        delete subscription.id;
+        delete subscription.expiresAt;
 
-      log(`Pepared payment ${hash}`);
+        paymentData = {
+          ...subscription,
+          renewalStatus: "PENDING",
+          paidAt: Timestamp.now(),
+          paidTo: publicKey,
+          renewalTier: tier,
+        };
+
+        await updateDocumentById({
+          updates: paymentData,
+          collectionName: "subscribers",
+          id: id || "",
+        });
+        log(`Pepared renewal payment ${hash}`);
+      } else {
+        await addDocument({
+          data: paymentData,
+          collectionName: "subscribers",
+          id: hash,
+        });
+        log(`Pepared payment ${hash}`);
+      }
 
       return true;
     } catch (error) {
