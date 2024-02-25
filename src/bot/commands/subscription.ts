@@ -29,15 +29,22 @@ export async function subscription(ctx: CommandContext<Context>) {
         .reply(text, { reply_markup: keyboard, parse_mode: "Markdown" })
         .catch((e) => errorHandler(e));
     } else {
-      const { tier, expiresAt } = userSubscription;
-      const userTier = subscriptionTiers[tier];
-      const formattedDate = expiresAt?.toDate().toLocaleDateString("en-GB", {
+      const { paidAt, expiresAt } = userSubscription;
+      // const userTier = subscriptionTiers[tier];
+
+      const paidDate = paidAt?.toDate().toLocaleDateString("en-GB", {
         day: "2-digit",
         month: "2-digit",
         year: "numeric",
       });
 
-      const text = `You have an active subscription for ${userTier.text}, subscription expires on ${formattedDate}`;
+      const expiryDate = expiresAt?.toDate().toLocaleDateString("en-GB", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+      });
+
+      const text = `You have an active subscription.\nStarted on - ${paidDate}\nExpires on ${expiryDate}`;
       ctx.reply(text).catch((e) => errorHandler(e));
     }
   } catch (error) {
