@@ -182,6 +182,9 @@ ${balancesText}
 ${mintStatus} Mint: ${mintText}
 ${lpStatus} LP status: ${lpText}
 
+Token Contract: 
+\`${tokenAddress}\`
+
 Security: [RugCheck](${rugCheckLink})
 🫧 Socials: ${socialsText}
 
