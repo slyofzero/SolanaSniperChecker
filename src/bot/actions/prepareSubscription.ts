@@ -5,7 +5,11 @@ import { encrypt } from "@/utils/cryptography";
 import { replicate } from "@/utils/general";
 import { errorHandler, log } from "@/utils/handlers";
 import { generateAccount } from "@/utils/web3";
-import { subscribers, subscriptionTiers } from "@/vars/subscribers";
+import {
+  subscribers,
+  renewalSubscriptionTiers,
+  subscriptionTiers,
+} from "@/vars/subscribers";
 import { Timestamp } from "firebase-admin/firestore";
 import { CallbackQueryContext, Context, InlineKeyboard } from "grammy";
 import { nanoid } from "nanoid";
@@ -22,12 +26,14 @@ export async function prepareSubscription(ctx: CallbackQueryContext<Context>) {
       );
     }
 
-    const selectedTier = subscriptionTiers[tier];
     const userId = from.id;
     const userSubscriptions = subscribers.filter(
       ({ user, status }) => user == userId && status === "PAID"
     );
     const isSubscribed = userSubscriptions.length > 0;
+    const selectedTier = isSubscribed
+      ? renewalSubscriptionTiers[tier]
+      : subscriptionTiers[tier];
 
     const notLockedAccount =
       ((

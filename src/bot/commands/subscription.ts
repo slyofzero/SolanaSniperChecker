@@ -1,5 +1,5 @@
 import { errorHandler } from "@/utils/handlers";
-import { subscribers, subscriptionTiers } from "@/vars/subscribers";
+import { subscribers, renewalSubscriptionTiers } from "@/vars/subscribers";
 import { CommandContext, Context, InlineKeyboard } from "grammy";
 
 export async function subscription(ctx: CommandContext<Context>) {
@@ -18,8 +18,8 @@ export async function subscription(ctx: CommandContext<Context>) {
       const text = `Subscribe to the bot to receive regular alerts regarding new hype tokens on Solana, in our private channel. Below is the subscription tier list.\n\nFollow through the steps for payment, and at the end you'd be provided with a *one time only* link to join the channel.`;
       let keyboard = new InlineKeyboard();
 
-      for (const tier in subscriptionTiers) {
-        const { text, amount } = subscriptionTiers[tier];
+      for (const tier in renewalSubscriptionTiers) {
+        const { text, amount } = renewalSubscriptionTiers[tier];
         keyboard = keyboard
           .text(`${text} ${amount} SOL`, `subscribe-${tier}`)
           .row();
@@ -30,7 +30,7 @@ export async function subscription(ctx: CommandContext<Context>) {
         .catch((e) => errorHandler(e));
     } else {
       const { paidAt, expiresAt } = userSubscription;
-      // const userTier = subscriptionTiers[tier];
+      // const userTier = renewalSubscriptionTiers[tier];
 
       const paidDate = paidAt?.toDate().toLocaleDateString("en-GB", {
         day: "2-digit",

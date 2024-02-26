@@ -1,5 +1,5 @@
 import { errorHandler } from "@/utils/handlers";
-import { subscribers, subscriptionTiers } from "@/vars/subscribers";
+import { subscribers, renewalSubscriptionTiers } from "@/vars/subscribers";
 import { CommandContext, Context, InlineKeyboard } from "grammy";
 
 export async function renewal(ctx: CommandContext<Context>) {
@@ -18,8 +18,8 @@ export async function renewal(ctx: CommandContext<Context>) {
       const text = `Renew your subscription beforehand to keep staying in the private channel. The days you subscribe for would be added to your active subscription. Below is the subscription tier list.\n\nFollow through the steps for payment, and at the end you'd be provided with a *one time only* link to join the channel.`;
       let keyboard = new InlineKeyboard();
 
-      for (const tier in subscriptionTiers) {
-        const { text, amount } = subscriptionTiers[tier];
+      for (const tier in renewalSubscriptionTiers) {
+        const { text, amount } = renewalSubscriptionTiers[tier];
         keyboard = keyboard
           .text(`${text} ${amount} SOL`, `subscribe-${tier}`)
           .row();

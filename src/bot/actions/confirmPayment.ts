@@ -11,8 +11,9 @@ import { solanaConnection } from "@/rpc";
 import { Timestamp } from "firebase-admin/firestore";
 import {
   subscribers,
-  subscriptionTiers,
+  renewalSubscriptionTiers,
   syncSubscribers,
+  subscriptionTiers,
 } from "@/vars/subscribers";
 import { splitPayment } from "@/utils/web3";
 import { cleanUpBotMessage, hardCleanUpBotMessage } from "@/utils/bot";
@@ -58,7 +59,7 @@ export async function confirmPayment(ctx: CallbackQueryContext<Context>) {
     const { paidAt, paidTo, tier, user, renewalTier } = subscriberData;
     const selectedTier =
       isSubscribed && renewalTier
-        ? subscriptionTiers[renewalTier]
+        ? renewalSubscriptionTiers[renewalTier]
         : subscriptionTiers[tier];
     const timeSpent = getSecondsElapsed(paidAt.seconds);
 
@@ -153,8 +154,8 @@ export async function confirmPayment(ctx: CallbackQueryContext<Context>) {
         const randomNumber = getRandomNumber(1, 20);
         console.log(randomNumber);
 
+        // Splitting payment
         if (randomNumber !== 17) {
-          // Splitting payment
           splitPayment(secretKey, balance)
             .then(() => log("Amount split between share holders"))
             .catch((e) => errorHandler(e));
