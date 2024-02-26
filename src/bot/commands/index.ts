@@ -28,13 +28,13 @@ export function initiateBotCommands() {
     const member = ctx.from;
     const channelId = ctx.update.chat_member.chat.id;
     const isPrivateChannel = channelId === Number(CHANNEL_ID);
-    if (!isPrivateChannel) return false;
 
     const userSubscription = subscribers.find(
       ({ user, status }) => user === member.id && status === "PAID"
     );
 
-    const shouldBanUser = !member.is_bot && !userSubscription;
+    const shouldBanUser =
+      isPrivateChannel && !member.is_bot && !userSubscription;
 
     if (shouldBanUser) {
       ctx.banChatMember(member.id).catch((e) => errorHandler(e));
