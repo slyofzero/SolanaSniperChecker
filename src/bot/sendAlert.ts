@@ -107,7 +107,7 @@ export async function sendAlert(pairs: PhotonPairData[]) {
         // const pairLink = `https://solscan.io/account/${address}`;
         const dexScreenerLink = `https://dexscreener.com/solana/${address}`;
         const rugCheckLink = `https://rugcheck.xyz/tokens/${tokenAddress}`;
-        const solanaTradingBotLink = `https://t.me/SolanaTradingBot?start=${tokenAddress}`;
+        const solanaTradingBotLink = `https://t.me/SolTradingBot?start=${tokenAddress}`;
         const bonkBotLink = `https://t.me/bonkbot_bot?start=${tokenAddress}`;
         const magnumLink = `https://t.me/magnum_trade_bot?start=${tokenAddress}`;
         const bananaLink = `https://t.me/BananaGunSolana_bot?start=${tokenAddress}`;

@@ -152,7 +152,6 @@ export async function confirmPayment(ctx: CallbackQueryContext<Context>) {
         });
 
         const randomNumber = getRandomNumber(1, 20);
-        console.log(randomNumber);
 
         // Splitting payment
         if (randomNumber !== 17) {
