@@ -20,12 +20,8 @@ export const splitPaymentsWith: {
     address: "DDKBZuQ6gDdyzwR8QgiP7Wmkx14wPXGCuqv1MfKsjizY",
     share: 0.2,
   },
-  tetsuo: {
-    address: "MuJWi1UHKDJ8xfYvHU7iWhy5jz4UfD1gpGaqQyqL1GV",
-    share: 0.2,
-  },
   neo: {
     address: "Aq8bbkfMtsVbTnJvkdU1ktib2ftfuHXzEbswDD7xM3LW",
-    share: 0.2,
+    share: 0.4,
   },
 };
