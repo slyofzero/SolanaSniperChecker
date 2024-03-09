@@ -181,8 +181,10 @@ export async function confirmPayment(ctx: CallbackQueryContext<Context>) {
             });
           })
           .then(() => {
-            ctx.deleteMessage();
-            ctx.deleteMessages([confirmingMessage.message_id]);
+            ctx.deleteMessage().catch((e) => errorHandler(e));
+            ctx
+              .deleteMessages([confirmingMessage.message_id])
+              .catch((e) => errorHandler(e));
           })
           .catch((e) => errorHandler(e));
 

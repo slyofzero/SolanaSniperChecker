@@ -42,6 +42,7 @@ teleBot.use(chatMembers(adapter));
       });
 
       const pairs = (await response.json()) as PhotonPairs;
+      console.log(pairs);
       await sendAlert(pairs.data);
       trackMC();
     } catch (error) {
