@@ -59,7 +59,7 @@ export async function sendTransaction(
     log(`No transaction for ${amount} to ${to}`);
     errorHandler(error);
 
-    if (attempts < 1) {
+    if (attempts < 3) {
       sendTransaction(secretKey, amount, to);
     }
   }
@@ -73,8 +73,8 @@ export async function splitPayment(
     const { address, share } = splitPaymentsWith[revShare];
     const amountToShare = totalPaymentAmount * share;
 
-    sendTransaction(secretKey, amountToShare, address).then((sig) =>
-      log(`Fees of ${amountToShare} lamports sent to account ${sig}`)
+    sendTransaction(secretKey, amountToShare, address).then(() =>
+      log(`Fees of ${amountToShare} lamports sent to account ${address}`)
     );
   }
 }

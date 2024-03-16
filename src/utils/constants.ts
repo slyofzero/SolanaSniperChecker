@@ -17,7 +17,7 @@ export const splitPaymentsWith: {
     share: 0.4,
   },
   gag: {
-    address: "DDKBZuQ6gDdyzwR8QgiP7Wmkx14wPXGCuqv1MfKsjizY",
+    address: "ELMXLPCtKjDVSTgNXdHBM7kHhC9yUzxBZYpmGfLsaGVC",
     share: 0.3,
   },
   neo: {
