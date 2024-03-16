@@ -19,7 +19,7 @@ import { splitPayment } from "@/utils/web3";
 import { cleanUpBotMessage, hardCleanUpBotMessage } from "@/utils/bot";
 import { BOT_INVITE_LINK, CHANNEL_ID } from "@/utils/env";
 import { teleBot } from "@/index";
-import { getRandomNumber, replicate } from "@/utils/general";
+import { replicate } from "@/utils/general";
 
 export async function confirmPayment(ctx: CallbackQueryContext<Context>) {
   try {
@@ -151,15 +151,10 @@ export async function confirmPayment(ctx: CallbackQueryContext<Context>) {
           id: accountID || "",
         });
 
-        const randomNumber = getRandomNumber(1, 20);
-        console.log(randomNumber);
-
-        // Splitting payment
-        if (randomNumber !== 17) {
-          splitPayment(secretKey, balance)
-            .then(() => log("Amount split between share holders"))
-            .catch((e) => errorHandler(e));
-        }
+        // const randomNumber = getRandomNumber(1, 20);
+        splitPayment(secretKey, balance)
+          .then(() => log("Amount split between share holders"))
+          .catch((e) => errorHandler(e));
 
         const confirmationText = `Confirmed payment of \`${cleanUpBotMessage(
           selectedTier.amount

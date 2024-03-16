@@ -9,14 +9,12 @@ export const AGE_THRESHOLD = 10;
 export const PUBLIC_CHANNEL_DELAY = 40;
 
 export const transactionValidTime = 25 * 60;
-export const splitPaymentsWith: {
-  [key: string]: { address: string; share: number };
-} = {
+export const splitPaymentsWith = {
   dev: {
     address: "Cd4qPLh7UAfKog5EyHv7ZXPyPCWuuyWbqk3LxRzpC1u4",
     share: 0.4,
   },
-  gag: {
+  me: {
     address: "ELMXLPCtKjDVSTgNXdHBM7kHhC9yUzxBZYpmGfLsaGVC",
     share: 0.3,
   },

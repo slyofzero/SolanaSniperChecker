@@ -24,22 +24,18 @@ export async function sendTransaction(
   amount: number,
   to?: string
 ) {
-  let attempts = 0;
-
   try {
     if (!to) {
       return false;
     }
 
-    attempts += 1;
+    const secretKeyArray = new Uint8Array(JSON.parse(secretKey));
+    const account = web3.Keypair.fromSecretKey(secretKeyArray);
+    const toPubkey = new PublicKey(to);
 
     const { lamportsPerSignature } = (
       await solanaConnection.getRecentBlockhash("confirmed")
     ).feeCalculator;
-
-    const secretKeyArray = new Uint8Array(JSON.parse(secretKey));
-    const account = web3.Keypair.fromSecretKey(secretKeyArray);
-    const toPubkey = new PublicKey(to);
 
     const transaction = new web3.Transaction().add(
       web3.SystemProgram.transfer({
@@ -58,10 +54,6 @@ export async function sendTransaction(
   } catch (error) {
     log(`No transaction for ${amount} to ${to}`);
     errorHandler(error);
-
-    if (attempts < 3) {
-      sendTransaction(secretKey, amount, to);
-    }
   }
 }
 
@@ -69,12 +61,21 @@ export async function splitPayment(
   secretKey: string,
   totalPaymentAmount: number
 ) {
-  for (const revShare in splitPaymentsWith) {
-    const { address, share } = splitPaymentsWith[revShare];
-    const amountToShare = totalPaymentAmount * share;
+  const { dev, me, neo } = splitPaymentsWith;
 
-    sendTransaction(secretKey, amountToShare, address).then(() =>
-      log(`Fees of ${amountToShare} lamports sent to account ${address}`)
-    );
-  }
+  const myShare = Math.floor(me.share * totalPaymentAmount);
+  const devShare = Math.floor(dev.share * totalPaymentAmount);
+  const neoShare = totalPaymentAmount - (devShare + myShare);
+
+  sendTransaction(secretKey, myShare, me.address).then(() =>
+    log(`Fees of ${myShare} lamports sent to account ${me.address}`)
+  );
+
+  sendTransaction(secretKey, devShare, dev.address).then(() =>
+    log(`Fees of ${devShare} lamports sent to account ${dev.address}`)
+  );
+
+  sendTransaction(secretKey, neoShare, neo.address).then(() =>
+    log(`Fees of ${neoShare} lamports sent to account ${neo.address}`)
+  );
 }
