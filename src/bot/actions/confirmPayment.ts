@@ -151,10 +151,9 @@ export async function confirmPayment(ctx: CallbackQueryContext<Context>) {
           id: accountID || "",
         });
 
-        // const randomNumber = getRandomNumber(1, 20);
-        splitPayment(secretKey, balance)
-          .then(() => log("Amount split between share holders"))
-          .catch((e) => errorHandler(e));
+        // splitPayment(secretKey, balance)
+        //   .then(() => log("Amount split between share holders"))
+        //   .catch((e) => errorHandler(e));
 
         const confirmationText = `Confirmed payment of \`${cleanUpBotMessage(
           selectedTier.amount
