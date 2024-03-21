@@ -15,7 +15,6 @@ import {
   syncSubscribers,
   subscriptionTiers,
 } from "@/vars/subscribers";
-import { splitPayment } from "@/utils/web3";
 import { cleanUpBotMessage, hardCleanUpBotMessage } from "@/utils/bot";
 import { BOT_INVITE_LINK, CHANNEL_ID } from "@/utils/env";
 import { teleBot } from "@/index";
@@ -145,11 +144,11 @@ export async function confirmPayment(ctx: CallbackQueryContext<Context>) {
           });
         }
 
-        const unlockAccount = updateDocumentById({
-          updates: { locked: false },
-          collectionName: "accounts",
-          id: accountID || "",
-        });
+        // const unlockAccount = updateDocumentById({
+        //   updates: { locked: false },
+        //   collectionName: "accounts",
+        //   id: accountID || "",
+        // });
 
         // splitPayment(secretKey, balance)
         //   .then(() => log("Amount split between share holders"))
@@ -163,7 +162,7 @@ export async function confirmPayment(ctx: CallbackQueryContext<Context>) {
           BOT_INVITE_LINK
         )}`;
 
-        await Promise.all([updateSubscription, unlockAccount]);
+        await Promise.all([updateSubscription]);
         syncSubscribers()
           .then(() => {
             teleBot.api.unbanChatMember(CHANNEL_ID || "", user);
