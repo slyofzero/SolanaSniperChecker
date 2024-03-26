@@ -11,12 +11,15 @@ export async function unlockUnusedAccounts() {
     queries: [["locked", "==", true]],
   })) as StoredAccount[];
 
+  log("Unlocking accounts");
+
   for (const { id, secretKey } of lockedAccounts) {
     try {
       const account = Keypair.fromSecretKey(
         new Uint8Array(JSON.parse(decrypt(secretKey)))
       );
       const balance = await solanaConnection.getBalance(account.publicKey);
+      log(`Account balance - ${balance}`);
 
       if (balance === 0) {
         updateDocumentById({

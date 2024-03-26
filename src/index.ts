@@ -58,3 +58,24 @@ teleBot.use(chatMembers(adapter));
     unlockUnusedAccounts();
   }, 60 * 60 * 1e3);
 })();
+
+// import { PublicKey } from "@solana/web3.js";
+// import { getDocument } from "./firebase";
+// import { rpcConfig, solanaConnection } from "./rpc";
+// import { StoredAccount } from "./types/accounts";
+
+// (async () => {
+//   rpcConfig();
+//   const accounts = (await getDocument({
+//     collectionName: "accounts",
+//   })) as StoredAccount[];
+
+//   accounts.forEach(async ({ publicKey }) => {
+//     const pubKey = new PublicKey(publicKey);
+//     const balance = await solanaConnection.getBalance(pubKey);
+
+//     if (balance > 0) {
+//       console.log(publicKey);
+//     }
+//   });
+// })();
