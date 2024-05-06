@@ -1,3 +1,5 @@
+import puppeteerExtra, { PuppeteerExtra } from "puppeteer-extra";
+import StealthPlugin from "puppeteer-extra-plugin-stealth";
 import { Bot, type Context, MemorySessionStorage } from "grammy";
 import { type ChatMember } from "grammy/types";
 import { initiateBotCommands, initiateCallbackQueries } from "./bot";
@@ -12,6 +14,25 @@ import { chatMembers, type ChatMembersFlavor } from "@grammyjs/chat-members";
 import { syncSubscribers } from "./vars/subscribers";
 import { cleanUpSubscriptions } from "./bot/cleanUpSubscriptions";
 import { unlockUnusedAccounts } from "./bot/unlockUnusedAccounts";
+
+const puppeteer = puppeteerExtra as unknown as PuppeteerExtra;
+puppeteer.use(StealthPlugin());
+
+async function getData() {
+  const browser = await puppeteer.launch({ headless: true });
+  const page = await browser.newPage();
+  const headers = {
+    Cookie: `_photon_ta=${PHOTON_COOKIE}`,
+  };
+  await page.setExtraHTTPHeaders(headers);
+  const response = await page.goto(DATA_URL || "", {
+    waitUntil: "networkidle0",
+  });
+
+  const text = JSON.parse((await response?.text()) || "[]");
+  await browser.close();
+  return text as PhotonPairs;
+}
 
 if (!BOT_TOKEN || !DATA_URL) {
   log("BOT_TOKEN or WSS_URL or DATA_URL is missing");
@@ -37,11 +58,7 @@ teleBot.use(chatMembers(adapter));
 
   async function toRepeat() {
     try {
-      const response = await fetch(DATA_URL || "", {
-        headers: { Cookie: `_photon_ta=${PHOTON_COOKIE}` },
-      });
-
-      const pairs = (await response.json()) as PhotonPairs;
+      const pairs = await getData();
       await sendAlert(pairs.data);
       trackMC();
     } catch (error) {

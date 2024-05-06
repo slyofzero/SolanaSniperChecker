@@ -37,6 +37,9 @@
     "grammy": "^1.20.3",
     "moment": "^2.29.4",
     "nanoid": "^3.3.7",
+    "puppeteer": "^22.7.1",
+    "puppeteer-extra": "^3.3.6",
+    "puppeteer-extra-plugin-stealth": "^2.11.2",
     "tweetnacl": "^1.0.3",
     "ws": "^8.16.0"
   }
