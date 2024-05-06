@@ -29,6 +29,7 @@ export async function sendAlert(pairs: PhotonPairData[]) {
     }
 
     const newIndexedTokens = [];
+    log(`Got ${pairs.length} pairs`);
 
     for (const pair of pairs) {
       const {
