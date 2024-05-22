@@ -8,12 +8,14 @@ import { subscription } from "./subscription";
 import { renewal } from "./renewal";
 
 export function initiateBotCommands() {
-  teleBot.api.setMyCommands([
-    { command: "start", description: "Start the bot" },
-    // { command: "promo", description: "Set a promo text" },
-    { command: "subscribe", description: "To subscribe to the bot" },
-    { command: "renew", description: "To renew your ongoing subscription" },
-  ]);
+  teleBot.api
+    .setMyCommands([
+      { command: "start", description: "Start the bot" },
+      // { command: "promo", description: "Set a promo text" },
+      { command: "subscribe", description: "To subscribe to the bot" },
+      { command: "renew", description: "To renew your ongoing subscription" },
+    ])
+    .catch((e) => errorHandler(e));
 
   teleBot.command("start", (ctx) => startBot(ctx));
   teleBot.command("promo", (ctx) => promo(ctx));

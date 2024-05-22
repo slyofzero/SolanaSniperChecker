@@ -11,5 +11,4 @@ export const {
   FIREBASE_KEY,
   ENCRYPTION_KEY,
   BOT_INVITE_LINK,
-  PUBLIC_CHANNEL_ID,
 } = process.env;
