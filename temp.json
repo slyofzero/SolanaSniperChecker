@@ -1,0 +1,46 @@
+{
+  "update": {
+    "update_id": 526471827,
+    "chat_member": {
+      "chat": {
+        "id": -1002008373376,
+        "title": "Solana Sniper Checker",
+        "type": "channel"
+      },
+      "from": {
+        "id": 7199331206,
+        "is_bot": false,
+        "first_name": "Sanjay Kumar"
+      },
+      "date": 1716452181,
+      "old_chat_member": {
+        "user": {
+          "id": 7199331206,
+          "is_bot": false,
+          "first_name": "Sanjay Kumar"
+        },
+        "status": "member"
+      },
+      "new_chat_member": {
+        "user": {
+          "id": 7199331206,
+          "is_bot": false,
+          "first_name": "Sanjay Kumar"
+        },
+        "status": "left"
+      }
+    }
+  },
+  "api": { "raw": {}, "config": {} },
+  "me": {
+    "id": 7163794671,
+    "is_bot": true,
+    "first_name": "SolanaSniperCheckerBot",
+    "username": "SolanaSniperCheckerBot",
+    "can_join_groups": true,
+    "can_read_all_group_messages": false,
+    "supports_inline_queries": false,
+    "can_connect_to_business": false
+  },
+  "chatMembers": {}
+}

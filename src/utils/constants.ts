@@ -1,3 +1,4 @@
+export const firebaseCollectionPrefix = "_sniper_checker";
 // export const VOLUME_THRESHOLD = 1000;
 // export const LIQUIDITY_THRESHOLD = 1;
 export const VOLUME_THRESHOLD = 10000;
