@@ -65,17 +65,19 @@ export async function trackMC() {
           const birdEyeLink = `https://birdeye.so/token/${tokenAddress}?chain=solana`;
           const photonLink = `https://photon-sol.tinyastro.io/en/r/@solhypealerts/${tokenAddress}`;
 
-          const text = `Powered By [Solana Hype Alerts](https://t.me/SolanaHypeTokenAlerts)
+          const text = `*[TOOLS AI FOMO ALERT GAINS](https://t.me/ToolsAiFomoAlerts_Solana)*
 
-[${hardCleanUpBotMessage(symbol)}](${tokenLink}) jumped by ${cleanUpBotMessage(
-            exactIncrease
-          )}x\\!\\!\\!
+🚀 [${hardCleanUpBotMessage(
+            symbol
+          )}](${tokenLink}) soared by ${cleanUpBotMessage(exactIncrease)}x\\!
 
-💲 MC when found: $${cleanUpBotMessage(formatToInternational(initialMC))}
-💲 MC now: $${cleanUpBotMessage(formatToInternational(currentMC))}
+\\- MC when found: $${cleanUpBotMessage(formatToInternational(initialMC))}
+\\- MC now: $${cleanUpBotMessage(formatToInternational(currentMC))}
 
-[Photon](${photonLink})
-[DexScreener](${dexScreenerLink}) \\| [BirdEye](${birdEyeLink})${promoText}`;
+Track with:
+\\- [Photon](${photonLink})
+\\- [DexScreener](${dexScreenerLink})
+\\- [BirdEye](${birdEyeLink})${promoText}`;
 
           teleBot.api
             .sendMessage(CHANNEL_ID, text, {
