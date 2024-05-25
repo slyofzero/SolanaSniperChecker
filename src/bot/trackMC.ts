@@ -65,7 +65,7 @@ export async function trackMC() {
           const birdEyeLink = `https://birdeye.so/token/${tokenAddress}?chain=solana`;
           const photonLink = `https://photon-sol.tinyastro.io/en/r/@solhypealerts/${tokenAddress}`;
 
-          const text = `*[TOOLS AI FOMO ALERT GAINS](https://t.me/ToolsAiFomoAlerts_Solana)*
+          const text = `*[TOOLS AI FOMO ALERT GAINS \\(SOL\\)](https://t.me/ToolsAiFomoAlerts_Solana)*
 
 🚀 [${hardCleanUpBotMessage(
             symbol

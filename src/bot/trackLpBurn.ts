@@ -31,7 +31,7 @@ export async function trackLpBurn(pair: PhotonPairData) {
       const birdEyeLink = `https://birdeye.so/token/${tokenAddress}?chain=solana`;
       const photonLink = `https://photon-sol.tinyastro.io/en/r/@solhypealerts/${tokenAddress}`;
 
-      const text = `Powered By [TOOLS AI FOMO ALERT GAINS](https://t.me/ToolsAiFomoAlerts_Solana)
+      const text = `Powered By [TOOLS AI FOMO ALERT GAINS \\(SOL\\)](https://t.me/ToolsAiFomoAlerts_Solana)
       
 [${hardCleanUpBotMessage(symbol)}](${tokenLink}) LP tokens burnt 🔥🔥🔥 
 
